@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Server
 {
@@ -15,7 +13,7 @@ namespace Server
         static void Main(string[] args)
         {
 
-            Socket udpUticnica = new Socket(AddressFamily.InterNetwork, 
+            Socket udpUticnica = new Socket(AddressFamily.InterNetwork,
                                             SocketType.Dgram, ProtocolType.Udp);
 
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, UdpPort);
@@ -34,15 +32,15 @@ namespace Server
                 if (poruka.StartsWith("PRIJAVA:"))
                 {
                     ObradiPrijavuIgraca(poruka, klijentEndPoint, udpUticnica);
-                }       
-            
+                }
+
             }
         }
 
         private static void ObradiPrijavuIgraca(string poruka, EndPoint klijentEndPoint, Socket udpUticnica)
         {
             string[] dijeloviPoruke = poruka.Substring(8).Split(',');
-            if(dijeloviPoruke.Length < 2)
+            if (dijeloviPoruke.Length < 2)
             {
                 Console.WriteLine("Neispravan format poruke za prijavu.");
                 return;
@@ -51,7 +49,7 @@ namespace Server
             string imeIgraca = dijeloviPoruke[0].Trim();
             string listaIgara = dijeloviPoruke[1].Trim();
 
-            string[] validneIgre = {"an", "po", "as"};
+            string[] validneIgre = { "an", "po", "as" };
             bool ispravnaListaIgara = listaIgara.Split(',').All(igra => validneIgre.Contains(igra.Trim()));
 
             if (!ispravnaListaIgara)

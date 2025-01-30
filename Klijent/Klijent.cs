@@ -11,7 +11,7 @@ namespace Klijent
 {
     internal class Klijent
     {
-        static void Main(string[] args)
+        internal void Main(string[] args)
         {
         }
     }
