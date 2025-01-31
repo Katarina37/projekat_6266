@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Server
 {
-    internal class Server
+    public class Server
     {
         private const int UdpPort = 9000;
         private const int TcpPort = 9001;
@@ -85,10 +85,31 @@ namespace Server
                 klijentSocket.Send(dobrodosliPodaci);
 
                 Console.WriteLine("Poruka dobrodoslice poslata.");
-                klijentSocket.Close();
+
+                byte[] prijemniBafer = new byte[1024];
+                int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova).Trim();
+                
+                if(odgovor.Equals("START", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Igrac {imeIgraca} je zapoceo kviz.");
+                    ZapocniKviz(klijentSocket, imeIgraca);
+                }
+                else
+                {
+                    Console.WriteLine($"Igrac {imeIgraca} nije poslao START. Konekcija se zatvara.");
+                    klijentSocket.Close();
+                }
+
                 break;
             }
             tcpUticnica.Close();
+        }
+
+        private static void ZapocniKviz(Socket klijentSocket, string imeIgraca)
+        {
+            Console.WriteLine($"Zapocinjem kviz za igraca {imeIgraca}");
+            klijentSocket.Close();
         }
     }
 }

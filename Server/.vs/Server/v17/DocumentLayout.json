@@ -3,15 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|C:\\Users\\USER\\Desktop\\pr62-66\\Server\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|c:\\users\\user\\desktop\\pr62-66\\server\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|solutionrelative:server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{CBD5F4CD-EE24-409F-8AA9-739FC77C339D}|..\\Klijent\\Klijent.csproj|c:\\users\\user\\desktop\\pr62-66\\klijent\\klijent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|c:\\users\\user\\desktop\\pr62-66\\server\\klase\\igrac.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|solutionrelative:klase\\igrac.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -21,24 +17,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Klijent.cs",
-              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\pr62-66\\Klijent\\Klijent.cs",
-              "RelativeDocumentMoniker": "..\\Klijent\\Klijent.cs",
-              "ToolTip": "C:\\Users\\USER\\Desktop\\pr62-66\\Klijent\\Klijent.cs",
-              "RelativeToolTip": "..\\Klijent\\Klijent.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAJAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-30T10:05:37.313Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
               "$type": "Document",
@@ -48,31 +39,23 @@
               "RelativeDocumentMoniker": "Server.cs",
               "ToolTip": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\Server.cs",
               "RelativeToolTip": "Server.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAABHAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-30T10:05:06.137Z",
+              "WhenOpened": "2025-01-31T10:49:41.222Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Igrac.cs",
-              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\Klase\\Igrac.cs",
-              "RelativeDocumentMoniker": "Klase\\Igrac.cs",
-              "ToolTip": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\Klase\\Igrac.cs",
-              "RelativeToolTip": "Klase\\Igrac.cs",
-              "ViewState": "AQIAABEAAAAAAAAAAAAAACoAAAAyAAAA",
+              "DocumentIndex": 1,
+              "Title": "Klijent.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\pr62-66\\Klijent\\Klijent.cs",
+              "RelativeDocumentMoniker": "..\\Klijent\\Klijent.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\pr62-66\\Klijent\\Klijent.cs",
+              "RelativeToolTip": "..\\Klijent\\Klijent.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-30T10:52:09.356Z",
+              "WhenOpened": "2025-01-31T10:49:19.972Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             }
           ]
         }

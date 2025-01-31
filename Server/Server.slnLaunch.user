@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Name": "Server.csproj",
+        "Action": "Start",
+        "DebugTarget": ""
+      },
+      {
+        "Name": "..\\Klijent\\Klijent.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
