@@ -57,6 +57,7 @@ namespace Klijent
                 Console.WriteLine($"Greska : {ex.Message}");
                 Console.ReadLine();
             }
+            Console.ReadLine();
         }
     }
 }
