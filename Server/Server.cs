@@ -40,7 +40,7 @@ namespace Server
         private static void ObradiPrijavuIgraca(string poruka, EndPoint klijentEndPoint, Socket udpUticnica)
         {
             string[] dijeloviPoruke = poruka.Substring(8).Split(',');
-            if (dijeloviPoruke.Length < 2)
+            if (!poruka.StartsWith("PRIJAVA:") || dijeloviPoruke.Length < 2)
             {
                 Console.WriteLine("Neispravan format poruke za prijavu.");
                 return;
@@ -69,7 +69,7 @@ namespace Server
 
         private static void PokreniTcpKomunikaciju(string imeIgraca)
         {
-            Socket tcpUticnica = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            Socket tcpUticnica = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpUticnica.Bind(new IPEndPoint(IPAddress.Any, TcpPort));
             tcpUticnica.Listen(10);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -8,12 +9,29 @@ namespace Klijent
 {
     public class Klijent
     {
-        private const string ServerIP = "127.0.0.1";
+        private const string ServerIP = "192.168.1.105";
+        private const int UdpPort = 9000;
         private const int TcpPort = 9001;
         static void Main(string[] args)
         {
             try
             {
+                //udp prijava
+                using (Socket udpKlijent = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                {
+                    string prijavaPoruka = "PRIJAVA:ImeIgraca,an,po";
+                    byte[] podaci = Encoding.UTF8.GetBytes(prijavaPoruka);
+                    udpKlijent.SendTo(podaci, new IPEndPoint(IPAddress.Parse(ServerIP), UdpPort));
+                    Console.WriteLine("Poslata UDP prijava.");
+
+                    //cekanje odgovora
+                    byte[] prijemniiBafer = new byte[1024];
+                    EndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    int brPrimljenihBajtova = udpKlijent.ReceiveFrom(prijemniiBafer, ref serverEndPoint);
+                    string odg = Encoding.UTF8.GetString(prijemniiBafer, 0, brPrimljenihBajtova);
+                    Console.WriteLine($"Server odgovorio:{odg}");
+                }
+
                 //povezujemo se na server
                 Socket klijentSocet = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 klijentSocet.Connect(new IPEndPoint(IPAddress.Parse(ServerIP), TcpPort));
@@ -34,9 +52,10 @@ namespace Klijent
                 klijentSocet.Shutdown(SocketShutdown.Both);
                 klijentSocet.Close();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Greska : {e.Message}");
+                Console.WriteLine($"Greska : {ex.Message}");
+                Console.ReadLine();
             }
         }
     }
