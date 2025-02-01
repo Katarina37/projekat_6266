@@ -18,7 +18,7 @@ namespace Server
 
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, UdpPort);
             udpUticnica.Bind(endPoint);
-            Console.WriteLine($"Udp server slusa na portu {UdpPort}");
+            Console.WriteLine($"Udp server slusa na portu {UdpPort}\n");
 
             while (true)
             {
@@ -27,7 +27,7 @@ namespace Server
                 int brojPrimljenihBajtova = udpUticnica.ReceiveFrom(prijemniBafer, ref klijentEndPoint);
 
                 string poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-                Console.WriteLine($"Primljena poruka za prijavu: {poruka} od {klijentEndPoint}");
+                Console.WriteLine($"Primljena poruka za prijavu: {poruka} od {klijentEndPoint}\n");
 
                 if (poruka.StartsWith("PRIJAVA:"))
                 {
@@ -42,7 +42,7 @@ namespace Server
             string[] dijeloviPoruke = poruka.Substring(8).Split(',');
             if (!poruka.StartsWith("PRIJAVA:") || dijeloviPoruke.Length < 2)
             {
-                Console.WriteLine("Neispravan format poruke za prijavu.");
+                Console.WriteLine("Neispravan format poruke za prijavu.\n");
                 return;
             }
 
@@ -54,11 +54,11 @@ namespace Server
 
             if (!ispravnaListaIgara)
             {
-                Console.WriteLine("Neispravna lista igara.");
+                Console.WriteLine("Neispravna lista igara.\n");
                 return;
             }
 
-            Console.WriteLine($"Igrac {imeIgraca} zeli da igra igre: {listaIgara}");
+            Console.WriteLine($"Igrac {imeIgraca} zeli da igra igre: {listaIgara}\n");
 
             string tcpInformacije = $"TCP: 127.0.0.1:{TcpPort}";
             byte[] odgovorPodaci = Encoding.UTF8.GetBytes(tcpInformacije);
@@ -73,18 +73,18 @@ namespace Server
             tcpUticnica.Bind(new IPEndPoint(IPAddress.Any, TcpPort));
             tcpUticnica.Listen(10);
 
-            Console.WriteLine($"Tcp server slusa na portu {TcpPort}");
+            Console.WriteLine($"Tcp server slusa na portu {TcpPort}\n");
 
             while (true)
             {
                 Socket klijentSocket = tcpUticnica.Accept();
-                Console.WriteLine($"Uspostavljena TCP konekcija sa igracem.");
+                Console.WriteLine($"Uspostavljena TCP konekcija sa igracem.\n");
 
                 string porukaDobrodoslice = $"Dobrodosli u trening igru kviza Kviskoteke, danasnji tackmicar je {imeIgraca}";
                 byte[] dobrodosliPodaci = Encoding.UTF8.GetBytes(porukaDobrodoslice);
                 klijentSocket.Send(dobrodosliPodaci);
 
-                Console.WriteLine("Poruka dobrodoslice poslata.");
+                Console.WriteLine("Poruka dobrodoslice poslata.\n");
 
                 byte[] prijemniBafer = new byte[1024];
                 int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
@@ -92,12 +92,12 @@ namespace Server
                 
                 if(odgovor.Equals("START", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine($"Igrac {imeIgraca} je zapoceo kviz.");
+                    Console.WriteLine($"Igrac {imeIgraca} je zapoceo kviz.\n");
                     ZapocniKviz(klijentSocket, imeIgraca);
                 }
                 else
                 {
-                    Console.WriteLine($"Igrac {imeIgraca} nije poslao START. Konekcija se zatvara.");
+                    Console.WriteLine($"Igrac {imeIgraca} nije poslao START. Konekcija se zatvara.\n");
                     klijentSocket.Close();
                 }
 

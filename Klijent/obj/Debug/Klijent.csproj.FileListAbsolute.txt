@@ -1,7 +1,7 @@
-C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.csproj.AssemblyReference.cache
-C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
 C:\Users\USER\Desktop\pr62-66\Klijent\bin\Debug\Klijent.exe.config
 C:\Users\USER\Desktop\pr62-66\Klijent\bin\Debug\Klijent.exe
 C:\Users\USER\Desktop\pr62-66\Klijent\bin\Debug\Klijent.pdb
+C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.csproj.AssemblyReference.cache
+C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
 C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.exe
 C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.pdb
