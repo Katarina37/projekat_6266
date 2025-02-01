@@ -60,7 +60,7 @@ namespace Server
 
             Console.WriteLine($"Igrac {imeIgraca} zeli da igra igre: {listaIgara}\n");
 
-            string tcpInformacije = $"TCP: 127.0.0.1:{TcpPort}";
+            string tcpInformacije = $"TCP: 192.168.1.105:{TcpPort}";
             byte[] odgovorPodaci = Encoding.UTF8.GetBytes(tcpInformacije);
             udpUticnica.SendTo(odgovorPodaci, klijentEndPoint);
 
