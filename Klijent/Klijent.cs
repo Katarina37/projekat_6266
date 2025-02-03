@@ -48,17 +48,42 @@ namespace Klijent
                     string poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
                     Console.WriteLine($"Server : {poruka}\n");
 
-                    Console.WriteLine("Unesite START za pocetak igre: ");
+                    Console.WriteLine("Unesite START za pocetak igre: \n");
                     string odgovor = Console.ReadLine();
                     byte[] startPodaci = Encoding.UTF8.GetBytes(odgovor);
                     klijentSocket.Send(startPodaci);
-                    Console.WriteLine("Poslata poruka START.\n");
+                    Console.WriteLine("\nPoslata poruka START.\n");
+
+                    //igra anagrami
+                    while (true)
+                    {
+                        brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                        poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                        Console.WriteLine($"\nServer: {poruka}\n");
+
+                        Console.WriteLine("Unesite anagram: \n");
+                        string uneseniAnagram = Console.ReadLine();
+                        byte[] anagramPodaci = Encoding.UTF8.GetBytes(uneseniAnagram);
+                        klijentSocket.Send(anagramPodaci);
+                        Console.WriteLine("\nPoslata poruka sa anagramom.\n");
+
+                        brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                        string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                        Console.WriteLine($"Rezultat: {rezultat}\n");
+
+                        if(rezultat == "Anagram je validan!")
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Pokusajte ponovo.");
+                        }
+                    }
 
                     klijentSocket.Shutdown(SocketShutdown.Both);
                     klijentSocket.Close();
-                }
-
-                
+                }   
             }
             catch (Exception ex)
             {
