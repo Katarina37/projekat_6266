@@ -80,7 +80,7 @@ namespace Server
                 Socket klijentSocket = tcpUticnica.Accept();
                 Console.WriteLine($"Uspostavljena TCP konekcija sa igracem.\n");
 
-                string porukaDobrodoslice = $"Dobrodosli u trening igru kviza Kviskoteke, danasnji tackmicar je {imeIgraca}";
+                string porukaDobrodoslice = $"Dobrodosli u trening igru kviza Kviskoteke, danasnji tackmicar je {imeIgraca}.";
                 byte[] dobrodosliPodaci = Encoding.UTF8.GetBytes(porukaDobrodoslice);
                 klijentSocket.Send(dobrodosliPodaci);
 
@@ -92,24 +92,17 @@ namespace Server
                 
                 if(odgovor.Equals("START", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine($"Igrac {imeIgraca} je zapoceo kviz.\n");
-                    ZapocniKviz(klijentSocket, imeIgraca);
+                    Console.WriteLine($"Zapocinjem kviz za igraca {imeIgraca}.\n");
                 }
                 else
                 {
-                    Console.WriteLine($"Igrac {imeIgraca} nije poslao START. Konekcija se zatvara.\n");
+                    Console.WriteLine($"Igrac {imeIgraca} nije poslao START. \nKonekcija se zatvara.\n");
                     klijentSocket.Close();
                 }
 
                 break;
             }
             tcpUticnica.Close();
-        }
-
-        private static void ZapocniKviz(Socket klijentSocket, string imeIgraca)
-        {
-            Console.WriteLine($"Zapocinjem kviz za igraca {imeIgraca}");
-            klijentSocket.Close();
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Klijent
                 Console.WriteLine("Unesite ime/nadimak igraca: \n");
                 string imeIgraca = Console.ReadLine();
 
-                Console.WriteLine("\nUnesite igre koje zelite da igrate (an, po, as) odvojene zarezom: ");
+                Console.WriteLine("\nUnesite igre koje zelite da igrate (an, po, as) odvojene zarezom: \n");
                 string igre = Console.ReadLine();
 
                 string prijavaPoruka = $"PRIJAVA:{imeIgraca},{igre}";
