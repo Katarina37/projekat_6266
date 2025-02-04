@@ -74,13 +74,17 @@ namespace Klijent
                         string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
                         Console.WriteLine($"Rezultat: {rezultat}\n");
 
-                        if(rezultat == "Anagram je validan!")
+                        brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                        string bodoviPoruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                        Console.WriteLine($"Osvojeni poeni: {bodoviPoruka}");
+
+                        if (rezultat == "Anagram je validan!")
                         {
                             break;
                         }
                         else
                         {
-                            Console.WriteLine("Pokusajte ponovo.");
+                            Console.WriteLine("\nPokusajte ponovo.");
                         }
                     }
 

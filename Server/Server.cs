@@ -1,11 +1,10 @@
-﻿using System;
-using System.Globalization;
+﻿using Server.Klase;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
-using Server.Klase;
 
 namespace Server
 {
@@ -93,13 +92,13 @@ namespace Server
                 byte[] prijemniBafer = new byte[1024];
                 int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
                 string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova).Trim();
-                
-                if(odgovor.Equals("START", StringComparison.OrdinalIgnoreCase))
+
+                if (odgovor.Equals("START", StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine($"Zapocinjemo igre za igraca {imeIgraca} : {listaIgara}.\n");
                     string[] igre = listaIgara.Split(',');
-                    
-                    foreach(string igra in igre)
+
+                    foreach (string igra in igre)
                     {
                         string trimovanaIgra = igra.Trim().ToLower();
                         //pomocna metoda za pokretanje igre
@@ -142,8 +141,12 @@ namespace Server
         private static void PokreniAnagramIgru(Socket klijentSocket)
         {
             Console.WriteLine("---------------------------------IGRA ANAGRAMI----------------------------------\n");
-            Console.WriteLine("Unesite rijec za anagram: \n");
-            string unesenaRijec = Console.ReadLine().Trim().ToLower();
+
+            List<string> listaRijeci = new List<string> { "programiranje", "racunar", "univerzitet", "obrazovanje", "fakultet", "elektrotehnika" };
+            Random random = new Random();
+            string unesenaRijec = listaRijeci[random.Next(listaRijeci.Count)].ToLower();
+
+            Console.WriteLine($"Izgenerisana rijec za anagram je: {unesenaRijec}");
 
             Anagrami anagrami = new Anagrami();
             anagrami.UcitajRijeci(unesenaRijec);
@@ -156,25 +159,18 @@ namespace Server
             int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
             string predlozenAnagram = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
 
-            bool ispravanAnagram = ValidirajAnagram(unesenaRijec, predlozenAnagram);
+            bool ispravanAnagram = anagrami.ProvjeriAnagram(predlozenAnagram);
 
             string rezultat = ispravanAnagram ? "Anagram je validan!" :
                                                 "Anagram nije validan!";
             byte[] rezultatPodaci = Encoding.UTF8.GetBytes(rezultat);
             klijentSocket.Send(rezultatPodaci);
+
+            int poeni = ispravanAnagram ? anagrami.IzracunajPoene() : 0;
+            byte[] poeniPodaci = Encoding.UTF8.GetBytes(poeni.ToString());
+            klijentSocket.Send(poeniPodaci);
+
             klijentSocket.Close();
-        }
-
-        //pomocna metoda za PokreniAnagramIgru
-        private static bool ValidirajAnagram(string originalnaRijec, string predlozenAnagram)
-        {
-            char[] originalniKarakteri = originalnaRijec.Replace(" ", "").ToCharArray();
-            char[] anagramKarakteri = predlozenAnagram.Replace(" ", "").ToCharArray();
-
-            Array.Sort(originalniKarakteri);
-            Array.Sort(anagramKarakteri);
-            
-            return originalniKarakteri.SequenceEqual(anagramKarakteri);
         }
     }
 }
