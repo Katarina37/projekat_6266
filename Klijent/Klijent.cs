@@ -29,6 +29,7 @@ namespace Klijent
                 {
                     byte[] podaci = Encoding.UTF8.GetBytes(prijavaPoruka);
                     udpKlijent.SendTo(podaci, new IPEndPoint(IPAddress.Parse(ServerIP), UdpPort));
+                    Console.WriteLine("\n------------------------------------------------------------------------------------------");
                     Console.WriteLine("\nPoslata UDP prijava.\n");
 
                     byte[] prijemniBafer = new byte[1024];
@@ -48,11 +49,13 @@ namespace Klijent
                     string poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
                     Console.WriteLine($"Server : {poruka}\n");
 
+                    Console.WriteLine("------------------------------------------------------------------------------------------\n");
                     Console.WriteLine("Unesite START za pocetak igre: \n");
                     string odgovor = Console.ReadLine();
                     byte[] startPodaci = Encoding.UTF8.GetBytes(odgovor);
                     klijentSocket.Send(startPodaci);
                     Console.WriteLine("\nPoslata poruka START.\n");
+                    Console.WriteLine("------------------------------------------------------------------------------------------");
 
                     //igra anagrami
                     while (true)

@@ -30,6 +30,7 @@ namespace Server
                 int brojPrimljenihBajtova = udpUticnica.ReceiveFrom(prijemniBafer, ref klijentEndPoint);
 
                 string poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                Console.WriteLine("--------------------------------------------------------------------------------\n");
                 Console.WriteLine($"Primljena poruka za prijavu: {poruka} od {klijentEndPoint}\n");
 
                 if (poruka.StartsWith("PRIJAVA:"))
@@ -140,6 +141,7 @@ namespace Server
 
         private static void PokreniAnagramIgru(Socket klijentSocket)
         {
+            Console.WriteLine("---------------------------------IGRA ANAGRAMI----------------------------------\n");
             Console.WriteLine("Unesite rijec za anagram: \n");
             string unesenaRijec = Console.ReadLine().Trim().ToLower();
 
