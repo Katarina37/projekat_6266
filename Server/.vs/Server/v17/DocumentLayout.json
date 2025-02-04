@@ -3,15 +3,15 @@
   "WorkspaceRootPath": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CBD5F4CD-EE24-409F-8AA9-739FC77C339D}|..\\Klijent\\Klijent.csproj|c:\\users\\user\\desktop\\pr62-66\\klijent\\klijent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|c:\\users\\user\\desktop\\pr62-66\\server\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|solutionrelative:server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|C:\\Users\\USER\\Desktop\\pr62-66\\Server\\klase\\anagrami.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D3B58D43-C93C-4B8A-A625-3B712D3139BA}|Server.csproj|solutionrelative:klase\\anagrami.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CBD5F4CD-EE24-409F-8AA9-739FC77C339D}|..\\Klijent\\Klijent.csproj|c:\\users\\user\\desktop\\pr62-66\\klijent\\klijent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -21,7 +21,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -37,7 +37,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Anagrami.cs",
               "DocumentMoniker": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\Klase\\Anagrami.cs",
               "RelativeDocumentMoniker": "Klase\\Anagrami.cs",
@@ -45,12 +45,11 @@
               "RelativeToolTip": "Klase\\Anagrami.cs",
               "ViewState": "AQIAABQAAAAAAAAAAAAAABUAAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-03T10:27:59.848Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-03T10:27:59.848Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Server.cs",
               "DocumentMoniker": "C:\\Users\\USER\\Desktop\\pr62-66\\Server\\Server.cs",
               "RelativeDocumentMoniker": "Server.cs",
@@ -63,13 +62,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "Klijent.cs",
               "DocumentMoniker": "C:\\Users\\USER\\Desktop\\pr62-66\\Klijent\\Klijent.cs",
               "RelativeDocumentMoniker": "..\\Klijent\\Klijent.cs",
               "ToolTip": "C:\\Users\\USER\\Desktop\\pr62-66\\Klijent\\Klijent.cs",
               "RelativeToolTip": "..\\Klijent\\Klijent.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAFYAAAAxAAAA",
+              "ViewState": "AQIAAEUAAAAAAAAAAAAAAGYAAAABAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-31T10:49:19.972Z",
               "EditorCaption": ""
