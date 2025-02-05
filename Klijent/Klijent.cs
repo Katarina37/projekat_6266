@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Web;
 
 
 namespace Klijent
@@ -57,37 +58,21 @@ namespace Klijent
                     Console.WriteLine("\nPoslata poruka START.\n");
                     Console.WriteLine("------------------------------------------------------------------------------------------");
 
-                    //igra anagrami
-                    while (true)
+                    foreach(string igra in igre.Split(','))
                     {
-                        brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                        poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-                        Console.WriteLine($"\nServer: {poruka}\n");
-
-                        Console.WriteLine("Unesite anagram: \n");
-                        string uneseniAnagram = Console.ReadLine();
-                        byte[] anagramPodaci = Encoding.UTF8.GetBytes(uneseniAnagram);
-                        klijentSocket.Send(anagramPodaci);
-                        Console.WriteLine("\nPoslata poruka sa anagramom.\n");
-
-                        brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                        string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-                        Console.WriteLine($"Rezultat: {rezultat}\n");
-
-                        brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                        string bodoviPoruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-                        Console.WriteLine($"Osvojeni poeni: {bodoviPoruka}");
-
-                        if (rezultat == "Anagram je validan!")
+                        switch (igra.Trim().ToLower())
                         {
-                            break;
-                        }
-                        else
-                        {
-                            Console.WriteLine("\nPokusajte ponovo.");
+                            case "an":
+                                IgraAnagrami(klijentSocket);
+                                break;
+                            case "po":
+                                IgraPitanjaOdgovori(klijentSocket);
+                                break;
+                            default:
+                                Console.WriteLine("Nepoznata igra.");
+                                break;
                         }
                     }
-
                     klijentSocket.Shutdown(SocketShutdown.Both);
                     klijentSocket.Close();
                 }   
@@ -98,6 +83,74 @@ namespace Klijent
                 Console.ReadLine();
             }
             Console.ReadLine();
+        }
+
+        private static void IgraAnagrami(Socket klijentSocket)
+        {
+            byte[] prijemniBafer = new byte[1024];
+            int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+            string poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+            Console.WriteLine($"\nServer: {poruka}");
+
+            Console.WriteLine("Unesite anagram: ");
+            string uneseniAnagram = Console.ReadLine();
+            klijentSocket.Send(Encoding.UTF8.GetBytes(uneseniAnagram));
+
+            brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+            string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+            Console.WriteLine($"Rezultat: {rezultat}\n");
+
+            brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+            string bodoviPoruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+            Console.WriteLine($"Osvojeni poeni: {bodoviPoruka}");
+        }
+        
+        private static void IgraPitanjaOdgovori(Socket klijentSocket)
+        {
+            //ovdje treba da se ispravi da se nakon drugog postavljenog pitanja omoguci unos odgovora, posto trenutno ne funkcionise
+            while (true)
+            {
+                try
+                {
+                    byte[] prijemniBafer = new byte[1024];
+                    int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                    string pitanje = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+
+                    if (pitanje.ToLower().Contains("igra je zavrsena"))
+                    {
+                        Console.WriteLine("Igra pitanja i odgovori je zavrsena.");
+                        break;
+                    }
+
+                    Console.WriteLine($"Pitanje: {pitanje}\n\nOdgovorite sa 'A' za tacno ili 'B' za netacno\n");
+
+                    string korisnickiOdgovor = string.Empty;
+                    while (string.IsNullOrEmpty(korisnickiOdgovor))
+                    {
+                        Console.WriteLine("Unesite svoj odgovor: ");
+                        korisnickiOdgovor = Console.ReadLine()?.Trim().ToUpper();
+
+                        if (korisnickiOdgovor != "A" && korisnickiOdgovor != "B")
+                        {
+                            Console.WriteLine("Nevazeci unos. Molimo unesite 'A' za tacno ili 'B' za netacno.");
+                            korisnickiOdgovor = string.Empty;
+                        }
+                    }
+                    klijentSocket.Send(Encoding.UTF8.GetBytes(korisnickiOdgovor));
+
+                    brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                    string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                    Console.WriteLine($"Rezultat: {rezultat}");
+
+                    brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                    string poeni = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                    Console.WriteLine($"Osvojeni poeni: {poeni}");
+                }catch(Exception ex)
+                {
+                    Console.WriteLine($"Greska u komunikaciji: {ex.Message}");
+                    break;
+                }
+            }
         }
     }
 }

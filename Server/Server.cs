@@ -36,7 +36,6 @@ namespace Server
                 {
                     ObradiPrijavuIgraca(poruka, klijentEndPoint, udpUticnica);
                 }
-
             }
         }
 
@@ -125,8 +124,7 @@ namespace Server
                     PokreniAnagramIgru(klijentSocket);
                     break;
                 case "po":
-                    //poziv implementacije za drugu igru
-                    klijentSocket.Send(Encoding.UTF8.GetBytes("Zapocinjemo drugu igru."));
+                    PokreniPitanjaOdgovoriIgru(klijentSocket);
                     break;
                 case "as":
                     //poziv implementacije za drugu igru
@@ -170,7 +168,33 @@ namespace Server
             byte[] poeniPodaci = Encoding.UTF8.GetBytes(poeni.ToString());
             klijentSocket.Send(poeniPodaci);
 
-            klijentSocket.Close();
+           // klijentSocket.Close();
+        }
+
+        private static void PokreniPitanjaOdgovoriIgru(Socket klijentSocket)
+        {
+            Console.WriteLine("---------------------------------IGRA PITANJA I ODGOVORI----------------------------------\n");
+            PitanjaOdgovori pitanjaOdgovori = new PitanjaOdgovori();
+
+            while (pitanjaOdgovori.PostaviSljedecePitanje())
+            {
+                string pitanje = pitanjaOdgovori.TekucePitanje;
+                byte[] pitanjePodaci = Encoding.UTF8.GetBytes(pitanje);
+                klijentSocket.Send(pitanjePodaci);
+
+                byte[] prijemniBafer = new byte[1024];
+                int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                string korisnickiOdgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+
+                bool tacanOdgovor = pitanjaOdgovori.ProvjeriOdgovor(korisnickiOdgovor);
+                int poeni = pitanjaOdgovori.PoeniZaOdgovor(tacanOdgovor);
+
+                string rezultat = tacanOdgovor ? "Tacan odgovor!" : "Netacan odgovor!";
+                klijentSocket.Send(Encoding.UTF8.GetBytes(rezultat));
+                klijentSocket.Send(Encoding.UTF8.GetBytes($"Osvojeni poeni: {poeni}\n"));
+            }
+            klijentSocket.Send(Encoding.UTF8.GetBytes("Igra je zavrsena."));
+            //klijentSocket.Close();
         }
     }
 }
