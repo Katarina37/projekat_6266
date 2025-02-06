@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Server
@@ -173,28 +174,35 @@ namespace Server
 
         private static void PokreniPitanjaOdgovoriIgru(Socket klijentSocket)
         {
-            Console.WriteLine("---------------------------------IGRA PITANJA I ODGOVORI----------------------------------\n");
+            Console.WriteLine("\n---------------------------------IGRA PITANJA I ODGOVORI----------------------------------\n");
+            
             PitanjaOdgovori pitanjaOdgovori = new PitanjaOdgovori();
 
-            while (pitanjaOdgovori.PostaviSljedecePitanje())
+            while (true)
             {
-                string pitanje = pitanjaOdgovori.TekucePitanje;
-                byte[] pitanjePodaci = Encoding.UTF8.GetBytes(pitanje);
+                string pitanje = pitanjaOdgovori.PostaviSljedecePitanje();
+
+                if(pitanje == "Igra je zavrsena")
+                {
+                    klijentSocket.Send(Encoding.UTF8.GetBytes("Igra je zavrsena."));
+                    break;
+                }
+
+                byte[] pitanjePodaci = Encoding.UTF8.GetBytes($"Pitanje: {pitanje} \nOdgovorite sa 'A' za tacno ili 'B' za netacno:\n");
                 klijentSocket.Send(pitanjePodaci);
 
                 byte[] prijemniBafer = new byte[1024];
                 int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                string korisnickiOdgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
 
-                bool tacanOdgovor = pitanjaOdgovori.ProvjeriOdgovor(korisnickiOdgovor);
-                int poeni = pitanjaOdgovori.PoeniZaOdgovor(tacanOdgovor);
-
-                string rezultat = tacanOdgovor ? "Tacan odgovor!" : "Netacan odgovor!";
+                string rezultat = pitanjaOdgovori.ProvjeriOdgovor(odgovor[0]);
                 klijentSocket.Send(Encoding.UTF8.GetBytes(rezultat));
-                klijentSocket.Send(Encoding.UTF8.GetBytes($"Osvojeni poeni: {poeni}\n"));
+
             }
-            klijentSocket.Send(Encoding.UTF8.GetBytes("Igra je zavrsena."));
-            //klijentSocket.Close();
+
+            int ukupniPoeni = pitanjaOdgovori.DajPoene();
+            klijentSocket.Send(Encoding.UTF8.GetBytes($"Osvojili ste ukupno {ukupniPoeni} poena."));
         }
+        
     }
 }

@@ -8,16 +8,20 @@ namespace Server.Klase
 {
     public class PitanjaOdgovori
     {
-        public string TekucePitanje {  get; set; }
-        public bool TacanOdgovor {  get; set; }
+        private string TekucePitanje;
+
+        private bool TacanOdgovor;
+
         private Dictionary<string, bool> SvaPitanja;
 
-        private int trenutniIndex;
+        private int trenutniIndex = 0;
+
+        private int Poeni;
 
         public PitanjaOdgovori()
         {
             SvaPitanja = new Dictionary<string, bool>();
-            trenutniIndex = 0;
+            Poeni = 0;
             UcitajPitanja();
         }
 
@@ -35,27 +39,32 @@ namespace Server.Klase
             SvaPitanja.Add("Bool je tip podatka koji moze imati 3 razlicite vrijednosti", false);
         }
 
-        public bool PostaviSljedecePitanje()
+        public string PostaviSljedecePitanje()
         {
             if(trenutniIndex < SvaPitanja.Count)
             {
                 TekucePitanje = new List<string>(SvaPitanja.Keys)[trenutniIndex];
-                TacanOdgovor = new List<bool>(SvaPitanja.Values)[trenutniIndex];
+                TacanOdgovor = SvaPitanja[TekucePitanje];
                 trenutniIndex++;
-                return true;
+                return TekucePitanje;
             }
-            return false;
+            return "Igra je zavrsena";
         }
 
-        public bool ProvjeriOdgovor(string korisnickiOdgovor)
+        public string ProvjeriOdgovor(char odgovor)
         {
-            bool odgovor = korisnickiOdgovor.Trim().ToUpper() == "A" ? true : false;
-            return odgovor == TacanOdgovor;
+            bool odgovorBool = (odgovor == 'A' || odgovor == 'a');
+            if(odgovorBool == TacanOdgovor)
+            {
+                Poeni += 4;
+                return "Tacan odgovor! Osvojili ste 4 poena.";
+            }
+            return "Netacan odgovor";
         }
 
-        public int PoeniZaOdgovor(bool tacanOdgovor)
+        public int DajPoene()
         {
-            return tacanOdgovor ? 4 : 0;
+            return Poeni;
         }
     }
 }

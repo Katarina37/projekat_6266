@@ -107,50 +107,32 @@ namespace Klijent
         
         private static void IgraPitanjaOdgovori(Socket klijentSocket)
         {
-            //ovdje treba da se ispravi da se nakon drugog postavljenog pitanja omoguci unos odgovora, posto trenutno ne funkcionise
+            byte[] prijemniBafer = new byte[1024];
+
             while (true)
             {
-                try
+                int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                string poruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                Console.WriteLine("\n---------------------------------------PITANJE--------------------------------------------\n");
+                Console.WriteLine($"\nServer: {poruka}");
+
+                if(poruka == "Igra je zavrsena")
                 {
-                    byte[] prijemniBafer = new byte[1024];
-                    int brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                    string pitanje = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-
-                    if (pitanje.ToLower().Contains("igra je zavrsena"))
-                    {
-                        Console.WriteLine("Igra pitanja i odgovori je zavrsena.");
-                        break;
-                    }
-
-                    Console.WriteLine($"Pitanje: {pitanje}\n\nOdgovorite sa 'A' za tacno ili 'B' za netacno\n");
-
-                    string korisnickiOdgovor = string.Empty;
-                    while (string.IsNullOrEmpty(korisnickiOdgovor))
-                    {
-                        Console.WriteLine("Unesite svoj odgovor: ");
-                        korisnickiOdgovor = Console.ReadLine()?.Trim().ToUpper();
-
-                        if (korisnickiOdgovor != "A" && korisnickiOdgovor != "B")
-                        {
-                            Console.WriteLine("Nevazeci unos. Molimo unesite 'A' za tacno ili 'B' za netacno.");
-                            korisnickiOdgovor = string.Empty;
-                        }
-                    }
-                    klijentSocket.Send(Encoding.UTF8.GetBytes(korisnickiOdgovor));
-
-                    brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                    string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-                    Console.WriteLine($"Rezultat: {rezultat}");
-
-                    brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
-                    string poeni = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
-                    Console.WriteLine($"Osvojeni poeni: {poeni}");
-                }catch(Exception ex)
-                {
-                    Console.WriteLine($"Greska u komunikaciji: {ex.Message}");
                     break;
                 }
+
+                string odgovor = Console.ReadLine();
+                klijentSocket.Send(Encoding.UTF8.GetBytes(odgovor));
+
+                brojPrimljenihBajtova = klijentSocket.Receive(prijemniBafer);
+                string rezultat = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtova);
+                Console.WriteLine($"\nRezultat: {rezultat}");
             }
+
+            int brojPrimljenihBajtovaZadnji = klijentSocket.Receive(prijemniBafer);
+            string bodoviPoruka = Encoding.UTF8.GetString(prijemniBafer, 0, brojPrimljenihBajtovaZadnji);
+            Console.WriteLine($"Ukupni poeni: {bodoviPoruka}");
         }
+        
     }
 }
