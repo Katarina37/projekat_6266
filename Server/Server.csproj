@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Klase\Anagrami.cs" />
+    <Compile Include="Klase\Asocijacije.cs" />
     <Compile Include="Klase\Igrac.cs" />
     <Compile Include="Klase\PitanjaOdgovori.cs" />
     <Compile Include="Server.cs" />

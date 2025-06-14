@@ -1,51 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Server.Klase
 {
     public class Anagrami
     {
-        public string OriginalnaRijec { get; set; }
-        public string PredlozenAnagram { get; set; }
+        public string PocetnaRijec { get; set; }
+        public string PredlozenaRijec { get; set; }
 
         public void UcitajRijeci(string rijec)
         {
-            if (rijec.Length >= 7)
+            if (rijec.Length < 7 || string.IsNullOrWhiteSpace(rijec))
             {
-                OriginalnaRijec = rijec;
+                Console.WriteLine("Rijec mora imati najmanje 7 karaktera. Pokusajte ponovo!\n");
             }
             else
             {
-                Console.WriteLine("Rijec mora imati bar 7 karaktera.\n");
+                PocetnaRijec = rijec.ToLower().Trim();
             }
         }
 
-        public bool ProvjeriAnagram(string anagram)
+        public void PostaviPredlozenAnagram(string anagram)
         {
-            //uporedjujemo da li su iste duzine anagram i org rijec
-            if (anagram.Length != OriginalnaRijec.Length)
-            {
-                return false;
-            }
-
-            //sortiramo i uporedjujemo
-            char[] originalniNiz = OriginalnaRijec.ToCharArray();
-            char[] nizAnagrama = anagram.ToCharArray();
-            Array.Sort(originalniNiz);
-            Array.Sort(nizAnagrama);
-
-            //uporedjujemo da li su isti
-            return new string(originalniNiz) == new string(nizAnagrama);
+            PredlozenaRijec = anagram.ToLower().Trim();
         }
 
-        //ako je anagram tacan, igrac dobija broj poena kolika je duzina rijeci
+        public bool ProvjeriAnagram()
+        {
+            if (string.IsNullOrWhiteSpace(PocetnaRijec) || string.IsNullOrWhiteSpace(PredlozenaRijec))
+                return false;
+
+            if (PocetnaRijec.Length != PredlozenaRijec.Length)
+                return false;
+
+            char[] originalniNiz = PocetnaRijec.ToCharArray();
+            char[] anagramNiz = PredlozenaRijec.ToCharArray();
+
+            Array.Sort(originalniNiz);
+            Array.Sort(anagramNiz);
+
+            return new string(originalniNiz) == new string(anagramNiz);
+        }
+
         public int IzracunajPoene()
         {
-            return OriginalnaRijec.Length;
+            if (ProvjeriAnagram())
+            {
+                return PocetnaRijec.Length;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

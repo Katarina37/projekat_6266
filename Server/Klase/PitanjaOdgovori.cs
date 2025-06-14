@@ -9,13 +9,9 @@ namespace Server.Klase
     public class PitanjaOdgovori
     {
         private string TekucePitanje;
-
         private bool TacanOdgovor;
-
         private Dictionary<string, bool> SvaPitanja;
-
         private int trenutniIndex = 0;
-
         private int Poeni;
 
         public PitanjaOdgovori()
@@ -25,10 +21,9 @@ namespace Server.Klase
             UcitajPitanja();
         }
 
-        private void UcitajPitanja()
+        public void UcitajPitanja()
         {
             SvaPitanja.Add("Bajt ima 8 bita:", true);
-            SvaPitanja.Add("Osnovna jedinica za skladistenje podataka u racunarima je bajt:", false);
             SvaPitanja.Add("Git je programski jezik:", false);
             SvaPitanja.Add("Broj sistema koji koristi binarni sistem je osam", false);
             SvaPitanja.Add("Najveca vrijednost koju moze imati unsigned byte je 255:", true);
@@ -41,28 +36,46 @@ namespace Server.Klase
 
         public string PostaviSljedecePitanje()
         {
-            if(trenutniIndex < SvaPitanja.Count)
+            if (trenutniIndex < SvaPitanja.Count)
             {
-                TekucePitanje = new List<string>(SvaPitanja.Keys)[trenutniIndex];
-                TacanOdgovor = SvaPitanja[TekucePitanje];
-                trenutniIndex++;
-                return TekucePitanje;
+                int i = 0;
+                foreach (var par in SvaPitanja)
+                {
+                    if (i == trenutniIndex)
+                    {
+                        TekucePitanje = par.Key;
+                        TacanOdgovor = par.Value;
+                        trenutniIndex++;
+                        return TekucePitanje;
+                    }
+                    i++;
+                }
             }
-            return "Igra je zavrsena";
+
+            return "Igra je zavrsena! Nema vise pitanja.";
         }
 
         public string ProvjeriOdgovor(char odgovor)
         {
-            bool odgovorBool = (odgovor == 'A' || odgovor == 'a');
-            if(odgovorBool == TacanOdgovor)
+            bool odgovorBool;
+
+            if (odgovor == 'A' || odgovor == 'a')
+                odgovorBool = true;
+            else if (odgovor == 'B' || odgovor == 'b')
+                odgovorBool = false;
+            else
+                return "Nevazeci unos! Koristite A ili B!\n";
+
+            if (odgovorBool == TacanOdgovor)
             {
                 Poeni += 4;
-                return "Tacan odgovor! Osvojili ste 4 poena.";
+                return "Tacan odgovor! Osvojili ste 4 poena. \n";
             }
-            return "Netacan odgovor";
+
+            return "Netacan odgovor!";
         }
 
-        public int DajPoene()
+        public int UkupnoPoena()
         {
             return Poeni;
         }

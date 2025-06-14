@@ -2,24 +2,23 @@
 {
     public class Igrac
     {
-        public int Id { get; set; }
+        private static int sljedeciID = 1;
 
-        public string Ime { get; set; }
-
+        public int ID { get; private set; }
+        public string Nadimak { get; set; }
         public int[] PoeniPoIgrama { get; set; }
-
         public bool Kvisko { get; set; }
 
         public Igrac()
         {
-        }
 
-        public Igrac(int id, string ime, int[] poeniPoIgrama, bool kvisko)
+        }
+        public Igrac(string ime, int brojIgara)
         {
-            Id = id;
-            Ime = ime;
-            PoeniPoIgrama = poeniPoIgrama;
-            Kvisko = kvisko;
+            ID = sljedeciID++;
+            Nadimak = ime;
+            PoeniPoIgrama = new int[brojIgara];
+            Kvisko = false;
         }
 
         public void UloziKvisko()
@@ -27,21 +26,29 @@
             Kvisko = true;
         }
 
-        public void ResetujKvisko()
-        {
-            Kvisko = false;
-        }
-
-        public void DodajPoene(int indeksIgre, int poeni)
+        public void DodajPoene(int index, int poeni)
         {
             if (Kvisko)
             {
-                PoeniPoIgrama[indeksIgre] += poeni * 2;
+                PoeniPoIgrama[index] += poeni * 2;
+                Kvisko = false;
             }
             else
             {
-                PoeniPoIgrama[indeksIgre] += poeni;
+                PoeniPoIgrama[index] += poeni;
             }
+        }
+
+        public int UkupanBrojPoena()
+        {
+            int ukupno = 0;
+
+            foreach (var p in PoeniPoIgrama)
+            {
+                ukupno += p;
+            }
+
+            return ukupno;
         }
     }
 }
