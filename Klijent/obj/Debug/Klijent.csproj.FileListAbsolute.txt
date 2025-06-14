@@ -5,3 +5,10 @@ C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.csproj.AssemblyReference
 C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
 C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.exe
 C:\Users\USER\Desktop\pr62-66\Klijent\obj\Debug\Klijent.pdb
+C:\Users\Korisnik\Documents\proj\Klijent\bin\Debug\Klijent.exe.config
+C:\Users\Korisnik\Documents\proj\Klijent\bin\Debug\Klijent.exe
+C:\Users\Korisnik\Documents\proj\Klijent\bin\Debug\Klijent.pdb
+C:\Users\Korisnik\Documents\proj\Klijent\obj\Debug\Klijent.csproj.AssemblyReference.cache
+C:\Users\Korisnik\Documents\proj\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
+C:\Users\Korisnik\Documents\proj\Klijent\obj\Debug\Klijent.exe
+C:\Users\Korisnik\Documents\proj\Klijent\obj\Debug\Klijent.pdb
