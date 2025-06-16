@@ -188,7 +188,7 @@ namespace Server
         {
             Console.WriteLine("----------IGRA ANAGRAMI ----------\n");
 
-            List<string> listaRijeci = new List<string> { "programiranje", "racunar", "sto", "univerzitet", "mis", "elektrotehnika" };
+            List<string> listaRijeci = new List<string> { "programiranje", "racunar", "fakultet", "univerzitet", "tastatura", "elektrotehnika" };
             Random random = new Random();
             string unesenaRijec = listaRijeci[random.Next(listaRijeci.Count)].ToLower();
 
@@ -339,6 +339,7 @@ namespace Server
                                 igra.OtvoriSvaPoljaKolone(kolonaIdx);
                                 odgovor = $"Tacno rjesenje kolone {kolona}! Osvojili ste {poeniKolona} poena.\n";
                                 Console.WriteLine($"Igrac: {potez}");
+                                Console.WriteLine("Tacno rjesenje kolone.");
                             }
                             else
                             {
