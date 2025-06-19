@@ -21,10 +21,10 @@ namespace Server
             Console.WriteLine("Server je pokrenut i ceka prijavu igraca...\n");
             EndPoint klijentEP = new IPEndPoint(IPAddress.Any, 0);
 
-            string imeIgraca;
-            string listaIgara;
-            string[] igre;
-            int brojIgara;
+            string imeIgraca = "";
+            string listaIgara = "";
+            string[] igre = Array.Empty<string>();
+            int brojIgara = 0; ;
             Igrac igrac = null;
 
 
@@ -94,7 +94,7 @@ namespace Server
                 //TCP konekcija
                 Socket serverTCP = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 serverTCP.Bind(new IPEndPoint(IPAddress.Any, 50019));
-                serverTCP.Listen(10);
+                serverTCP.Listen(5);
 
                 Socket klijentSocket = serverTCP.Accept();
                 Console.WriteLine("Uspostavljena je TCP konekcija sa igracem.");
@@ -113,32 +113,54 @@ namespace Server
                 if (startStr.Equals("START", StringComparison.OrdinalIgnoreCase)) //igra pocinje ako je korisnik unio START
                 {
                     //Pocetak igre
+
                     Console.WriteLine($"Zapocinjemo igre: {listaIgara} za igraca {imeIgraca}!");
 
-                    foreach (string i in igre)
+                    for (int i = 0; i < igre.Length; i++)
                     {
-                        byte[] baferKvisko = new byte[1024];
-                        int kviskoBajt = klijentSocket.Receive(baferKvisko);
-                        string kvisko = Encoding.UTF8.GetString(baferKvisko, 0, kviskoBajt);
+                        string igra = igre[i];
+                        bool ponovi;
 
-                        if (kvisko == "KVISKO")
+                        do
                         {
-                            igrac.UloziKvisko();
-                            Console.WriteLine($"Kvisko je ulozen za igru: {i}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Kvisko nije ulozen za igru: {i}");
-                        }
+                            byte[] kviskoBf = new byte[1024];
+                            int kviskoBr = klijentSocket.Receive(kviskoBf);
+                            string kvisko = Encoding.UTF8.GetString(kviskoBf, 0, kviskoBr);
 
-                        string igraTrimovana = i.Trim().ToLower();
-                        PokreniIgru(klijentSocket, igraTrimovana, igrac, brOdigranihIgara);
+                            if (kvisko == "KVISKO")
+                            {
+                                igrac.UloziKvisko();
+                                Console.WriteLine($"Kvisko je ulozen za igru: {igra}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Kvisko nije ulozen za igru: {igra}");
+                            }
+
+                            string igraTrimovana = igra.Trim().ToLower();
+                            PokreniIgru(klijentSocket, igraTrimovana, igrac, brOdigranihIgara);
+
+                            byte[] ponovoBf = new byte[1024];
+                            int ponovoBr = klijentSocket.Receive(ponovoBf);
+                            string odgovor = Encoding.UTF8.GetString(ponovoBf, 0, ponovoBr);
+
+                            if (odgovor == "AGAIN")
+                            {
+                                Console.WriteLine($"Igrac zeli da igra {igra} ponovo.");
+                                ponovi = true;
+                            }
+                            else
+                            {
+                                ponovi = false;
+                            }
+                        } while (ponovi);
+
                         brOdigranihIgara++;
                     }
 
                     if (brOdigranihIgara == brojIgara) //Ako je igrac odigrao sve igre, prikazuju se svi bodovi koje je skupio
                     {
-                        string kraj = $"\nKraj igre! Igrac {igrac.Nadimak} je osvojio {igrac.UkupanBrojPoena()} poena.";
+                        string kraj = $"\nKraj trening igre! Igrac {igrac.Nadimak} je osvojio {igrac.UkupanBrojPoena()} poena.";
                         klijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
                         klijentSocket.Shutdown(SocketShutdown.Both);
                     }

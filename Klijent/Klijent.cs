@@ -16,13 +16,13 @@ namespace Klijent
             IPEndPoint klijentEP = new IPEndPoint(IPAddress.Parse("192.168.0.37"), 50009);
             EndPoint serverEP = new IPEndPoint(IPAddress.Any, 0);
 
-            string[] igre;
+            string[] igre = Array.Empty<string>();
 
             while (true)
             {
                 try
                 {
-                    string imeIgraca;
+                    string imeIgraca = "";
 
                     do
                     {
@@ -101,47 +101,68 @@ namespace Klijent
 
                 bool kviskoIskoristen = false;
 
-                foreach (string i in igre)
+                for (int i = 0; i < igre.Length; i++)
                 {
-                    if (!kviskoIskoristen)
-                    {
-                        Console.WriteLine($"Da li zelite da ulozite KVISKO za igru {i}? da/ne");
-                        string kvisko = Console.ReadLine()?.Trim().ToLower();
+                    string igra = igre[i];
+                    bool ponovi;
 
-                        if (kvisko == "da")
+                    do
+                    {
+                        if (!kviskoIskoristen)
                         {
-                            klijentSocket.Send(Encoding.UTF8.GetBytes("KVISKO"));
-                            Console.WriteLine($"Kvisko je ulozen za igru {i}.");
-                            kviskoIskoristen = true;
+                            Console.WriteLine($"Da li zelite da ulozite KVISKO za igru {igra}? da/ne");
+                            string kvisko = Console.ReadLine()?.Trim().ToLower();
+
+                            if (kvisko == "da")
+                            {
+                                klijentSocket.Send(Encoding.UTF8.GetBytes("KVISKO"));
+                                Console.WriteLine($"Kvisko je ulozen za igru {igra}.");
+                                kviskoIskoristen = true;
+                            }
+                            else
+                            {
+                                klijentSocket.Send(Encoding.UTF8.GetBytes("NO_KVISKO"));
+                                Console.WriteLine("Kvisko nije ulozen za ovu igru.");
+                            }
                         }
                         else
                         {
+                            Console.WriteLine($"Kvisko je vec iskoristen. Igra {igra} se nastavlja bez ulozenog kviska.\n");
                             klijentSocket.Send(Encoding.UTF8.GetBytes("NO_KVISKO"));
-                            Console.WriteLine("Kvisko nije ulozen za ovu igru.");
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Kvisko je vec iskoristen. Igra {i} se nastavlja bez ulozenog kviska.\n");
-                    }
 
-                    switch (i.ToLower())
-                    {
-                        case "an":
-                            AnagramiIgra(klijentSocket);
-                            break;
-                        case "po":
-                            PitanjaOdgovoriIgra(klijentSocket);
-                            break;
-                        case "as":
-                            AsocijacijeIgra(klijentSocket);
-                            break;
-                        default:
-                            Console.WriteLine("Nepoznata igra");
-                            break;
-                    }
+                        switch (igra.ToLower())
+                        {
+                            case "an":
+                                AnagramiIgra(klijentSocket);
+                                break;
+                            case "po":
+                                PitanjaOdgovoriIgra(klijentSocket);
+                                break;
+                            case "as":
+                                AsocijacijeIgra(klijentSocket);
+                                break;
+                            default:
+                                Console.WriteLine("Nepoznata igra.");
+                                break;
+                        }
 
-
+                        //ponavljanje igre
+                        Console.WriteLine($"Da li zelite da ponovite igru {igra}? da/ne");
+                        string unos = Console.ReadLine()?.Trim().ToLower();
+                        if (unos == "da")
+                        {
+                            klijentSocket.Send(Encoding.UTF8.GetBytes("AGAIN"));
+                            Console.WriteLine($"Igrac ponovo igra igru {igra}");
+                            ponovi = true;
+                            continue;
+                        }
+                        else
+                        {
+                            klijentSocket.Send(Encoding.UTF8.GetBytes("NOT_AGAIN"));
+                            ponovi = false;
+                        }
+                    } while (ponovi);
                 }
 
                 byte[] kraj = new byte[1024];
@@ -246,7 +267,7 @@ namespace Klijent
                     Console.WriteLine("\nUnesite polje koje zelite da otvorite (npr A1) ili rjesenje(npr. A:odgovor ili K:odgovor): ");
                     string unos = Console.ReadLine();
 
-                    klijentSocket.Send(Encoding.UTF8.GetBytes(unos));
+                    klijentSocket.Send(Encoding.UTF8.GetBytes(unos.ToUpper()));
 
                     brBajta = klijentSocket.Receive(prijemniBafer);
                     string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
