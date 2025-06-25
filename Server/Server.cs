@@ -12,6 +12,12 @@ namespace Server
 {
     public class Server
     {
+        static Dictionary<string, string> PuniNaziviIgara = new Dictionary<string, string>
+        {
+            {"an", "Anagrami" },
+            {"po", "Pitanja i odgovori" },
+            {"as", "Asocijacije" }
+        };
         static void Main(string[] args)
         {
             Socket serverUDP = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -114,7 +120,8 @@ namespace Server
                 {
                     //Pocetak igre
 
-                    Console.WriteLine($"Zapocinjemo igre: {listaIgara} za igraca {imeIgraca}!");
+                    string igreNazivi = string.Join(", ", igre.Select(i => PuniNaziviIgara.ContainsKey(i) ? PuniNaziviIgara[i] : i));
+                    Console.WriteLine($"Pocinju igre: {igreNazivi} za igraca {imeIgraca}!");
 
                     for (int i = 0; i < igre.Length; i++)
                     {
@@ -130,11 +137,11 @@ namespace Server
                             if (kvisko == "KVISKO")
                             {
                                 igrac.UloziKvisko();
-                                Console.WriteLine($"Kvisko je ulozen za igru: {igra}");
+                                Console.WriteLine($"Kvisko je ulozen za igru: {PuniNaziviIgara[igra]}");
                             }
                             else
                             {
-                                Console.WriteLine($"Kvisko nije ulozen za igru: {igra}");
+                                Console.WriteLine($"Kvisko nije ulozen za igru: {PuniNaziviIgara[igra]}");
                             }
 
                             string igraTrimovana = igra.Trim().ToLower();
