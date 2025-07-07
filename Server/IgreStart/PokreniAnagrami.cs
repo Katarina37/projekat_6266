@@ -80,6 +80,7 @@ namespace Server.IgreStart
                 Console.ForegroundColor = igrac.Boja;
                 Console.WriteLine($"Igra anagrami je zavrsena. Igrac {igrac.Igrac.Nadimak} je osvojio {poeniIgraca} poena.\n");
                 Console.ResetColor();
+                igrac.ZavrsioIgru = true;
             }
             Console.WriteLine("-----------------------------------------------------------\n");
         }

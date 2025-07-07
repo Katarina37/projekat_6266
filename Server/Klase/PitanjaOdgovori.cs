@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
 
 namespace Server.Klase
 {
+    
     public class PitanjaOdgovori
     {
         private string TekucePitanje;
@@ -13,6 +11,7 @@ namespace Server.Klase
         private Dictionary<string, bool> SvaPitanja;
         private int trenutniIndex = 0;
         private int Poeni;
+        private static Dictionary<Igrac, int> PoeniIgrac = new Dictionary<Igrac, int>();
 
         public PitanjaOdgovori()
         {
@@ -55,7 +54,7 @@ namespace Server.Klase
             return "Igra je zavrsena! Nema vise pitanja.";
         }
 
-        public string ProvjeriOdgovor(char odgovor)
+        public string ProvjeriOdgovor(Igrac trenutniIgrac, char odgovor)
         {
             bool odgovorBool;
 
@@ -68,16 +67,19 @@ namespace Server.Klase
 
             if (odgovorBool == TacanOdgovor)
             {
-                Poeni += 4;
+                if (!PoeniIgrac.ContainsKey(trenutniIgrac))
+                    PoeniIgrac[trenutniIgrac] = 0;
+
+                PoeniIgrac[trenutniIgrac] += 4;
                 return "Tacan odgovor! Osvojili ste 4 poena. \n";
             }
 
-            return "Netacan odgovor!";
+            return "Netacan odgovor! Osvojili ste 0 poena. \n";
         }
 
-        public int UkupnoPoena()
+        public int UkupnoPoena(Igrac trenutniIgrac)
         {
-            return Poeni;
+            return PoeniIgrac.ContainsKey(trenutniIgrac) ? PoeniIgrac[trenutniIgrac] : 0;
         }
     }
 }

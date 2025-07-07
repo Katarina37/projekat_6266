@@ -16,6 +16,7 @@ namespace Server.Klase
         public bool[] KviskoPrimljen { get; set; }
         public bool Startovan { get; set; }
         public ConsoleColor Boja { get; set; }
+        public bool ZavrsioIgru { get; set; }
 
         public SesijaIgraca(Socket socket, Igrac igrac, string[] igre, ConsoleColor boja)
         {
@@ -26,6 +27,7 @@ namespace Server.Klase
             KviskoPrimljen = new bool[igre.Length];
             Startovan = false;
             Boja = boja;
+            ZavrsioIgru = false;
         }
 
         public int PoeniKvisko(bool[] kviskoPoIgrama)

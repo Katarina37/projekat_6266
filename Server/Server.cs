@@ -225,6 +225,7 @@ namespace Server
                 {
                     string igra = sviIgraci[0].Igre[i];
                     bool ponoviIgru = false;
+                    
 
                     do
                     {
@@ -241,6 +242,7 @@ namespace Server
                             {
                                 string kviskoPitanje = $"Da li zelite da ulozite KVISKO za igru {PuniNaziviIgara[igra]}?";
                                 igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(kviskoPitanje + "\n"));
+                                Console.WriteLine("Poslao KVISKO pitanje.\n");
                             }
                         }
 
@@ -257,13 +259,15 @@ namespace Server
                                     if (kvisko == "KVISKO")
                                     {
                                         igrac.Igrac.UloziKvisko();
-                                        igrac.KviskoPoIgrama[i] = true;
                                         Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} ulaze KVISKO za igru {PuniNaziviIgara[igra]}.");
+                                        igrac.KviskoPoIgrama[i] = true;
+                                        
                                     }
                                     else
                                     {
-                                        igrac.KviskoPoIgrama[i] = false;
                                         Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} ne ulaze KVISKO za igru {PuniNaziviIgara[igra]}.");
+                                        igrac.KviskoPoIgrama[i] = false;
+                                        
                                     }
 
                                     igrac.KviskoPrimljen[i] = true;
@@ -287,11 +291,31 @@ namespace Server
 
                         PokreniIgru(igra, i, sviIgraci);
 
+                        while (true)
+                        {
+                            bool sviGotovi = sviIgraci.All(igrac => igrac.ZavrsioIgru);
+                            if (sviGotovi)
+                            {
+                                Console.WriteLine(">> Svi igraci su zavrsili trenutnu igru.");
+                                break;
+                            }
+                                
+
+                            Thread.Sleep(300); 
+                        }
+
+                        
+                        foreach (var igrac in sviIgraci)
+                        {
+                            igrac.ZavrsioIgru = false;
+                        }
+
 
                         if (trening)
                         {
                             SesijaIgraca igrac = sviIgraci[0];
                             igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes($"Da li zelite da ponovite igru {PuniNaziviIgara[igra]}? (da/ne)\n"));
+                            
 
                             if (igrac.KlijentSocket.Poll(10 * 1000 * 1000, SelectMode.SelectRead))
                             {
@@ -307,14 +331,23 @@ namespace Server
                                 }
                                 else
                                 {
-                                    brojOdigranihIgara++;
+                                    ponoviIgru = false;
                                 }
                             }
                             else
                             {
                                 Console.WriteLine(">> Nije stigao odgovor za ponavljanje — Igra se ne ponavlja.");
-                                brojOdigranihIgara++;
+                                
+                                ponoviIgru = false;
                             }
+                        } else
+                        {
+                            ponoviIgru = false;
+                        }
+
+                        if (!ponoviIgru)
+                        {
+                            brojOdigranihIgara++;
                         }
 
                     } while (ponoviIgru);
@@ -323,9 +356,11 @@ namespace Server
 
                     if (brojOdigranihIgara == brojIgara * sviIgraci.Count)
                     {
-                        
+                        Console.WriteLine(">> SVE IGRE SU ZAVRSENE <<");
                         break;
                     }
+
+                    Thread.Sleep(50);
 
                 }
 

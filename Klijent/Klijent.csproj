@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Igre\PokreniAN.cs" />
+    <Compile Include="Igre\PokreniPiO.cs" />
     <Compile Include="Klijent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
