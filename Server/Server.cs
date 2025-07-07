@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Server.Klase;
 using System.Net;
 using System.Net.Sockets;
-using System.IO.Pipes;
+using System.Threading;
+using Server.Pomocne_metode;
+using Server.IgreStart;
+
 
 namespace Server
 {
     public class Server
     {
-        static Dictionary<string, string> PuniNaziviIgara = new Dictionary<string, string>
+        static readonly Dictionary<EndPoint, (string, string[])> prijavljeniIgraci = new Dictionary<EndPoint, (string, string[])>();
+        static readonly Dictionary<string, string> PuniNaziviIgara = new Dictionary<string, string>
         {
             {"an", "Anagrami" },
             {"po", "Pitanja i odgovori" },
@@ -23,163 +26,335 @@ namespace Server
             Socket serverUDP = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 50009);
             serverUDP.Bind(serverEP);
+            serverUDP.Blocking = false;
 
-            Console.WriteLine("Server je pokrenut i ceka prijavu igraca...\n");
+            Socket serverTCP = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            serverTCP.Bind(new IPEndPoint(IPAddress.Any, 50019));
+            serverTCP.Listen(10);
+            serverTCP.Blocking = false;
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=========================================");
+            Console.WriteLine("      DOBRODOŠLI U KVISKOTEKA KVIZ       ");
+            Console.WriteLine("=========================================");
+            Console.ResetColor();
+
+            Console.WriteLine();
+            Console.WriteLine("Server je pokrenut i čeka prijavu igrača...");
+            Console.WriteLine();
+
             EndPoint klijentEP = new IPEndPoint(IPAddress.Any, 0);
 
-            string imeIgraca = "";
-            string listaIgara = "";
-            string[] igre = Array.Empty<string>();
-            int brojIgara = 0; ;
-            Igrac igrac = null;
+            DateTime? prvaPrijava = null;
+            TimeSpan cekanjeDrugePrijave = TimeSpan.FromSeconds(10);
 
-
+            #region UDP PRIJAVA
             while (true)
             {
-                byte[] prijemniBafer = new byte[1024];
 
-                try
+               if(serverUDP.Poll(1000*1000, SelectMode.SelectRead))
                 {
-                    int brBajta = serverUDP.ReceiveFrom(prijemniBafer, ref klijentEP);
-                    string primljenaPoruka = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-                    Console.WriteLine("Prijava je stigla. Provjera u toku...\n");
-                    //validacija prijave igraca
-                    if (primljenaPoruka.StartsWith("PRIJAVA: "))
+                    byte[] prijemniBafer = new byte[1024];
+
+                    try
                     {
-                        string[] dijelovi = primljenaPoruka.Substring(9).Split(new char[] { ',' }, 2);
-
-
-                        if (dijelovi.Length != 2)
+                        if(serverUDP.Available > 0)
                         {
-                            Console.WriteLine("Neispravan format poruke za prijavu!");
+                            int brBajta = serverUDP.ReceiveFrom(prijemniBafer, ref klijentEP);
+                            string primljenaPoruka = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
+                            Console.WriteLine("Prijava je stigla. Provjera u toku...\n");
+                            
+                            if (primljenaPoruka.StartsWith("PRIJAVA: "))
+                            {
+                                string[] dijelovi = primljenaPoruka.Substring(9).Split(new char[] { ',' }, 2);
+
+
+                                if (dijelovi.Length != 2)
+                                {
+                                    Console.WriteLine("Neispravan format poruke za prijavu!");
+                                }
+
+                                string imeIgraca = dijelovi[0].Trim();
+                                string listaIgara = dijelovi[1].Trim();
+
+                                string[] igre = listaIgara.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).ToArray();
+                                string[] validneIgre = { "an", "po", "as" };
+                                bool ispravnaListaIgara = igre.All(igra => validneIgre.Contains(igra.Trim()));
+
+                                if (igre.All(i => validneIgre.Contains(i)))
+                                {
+                                    prijavljeniIgraci.Add(klijentEP, (imeIgraca, igre));
+
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine($"\nIgrač '{imeIgraca}' je uspešno prijavljen!\n");
+                                    Console.ResetColor();
+
+                                    Console.WriteLine("Čeka se početak igre...");
+                                    Console.WriteLine("-----------------------------------------");
+                                    string prijavaOdgovor = "Prijava je uspjesna.Uspostavljanje TCP konekcije...........\n";
+                                    byte[] prijavaBajt = Encoding.UTF8.GetBytes(prijavaOdgovor);
+                                    serverUDP.SendTo(prijavaBajt, klijentEP);
+                                    Thread.Sleep(20);
+
+                                    if (prvaPrijava == null)
+                                    {
+                                        prvaPrijava = DateTime.Now;
+                                    }
+
+
+                                }
+                                else
+                                {
+                                    byte[] odgovorIgre = Encoding.UTF8.GetBytes("Neispravna lista igara.Pokusajte ponovo!\n");
+                                    serverUDP.SendTo(odgovorIgre, klijentEP);
+                                }
+
+                            }
+                            else
+                            {
+                                byte[] prijava = Encoding.UTF8.GetBytes("Neuspjesna prijava!Pokusajte ponovo!\n");
+                                serverUDP.SendTo(prijava, klijentEP);
+                            }
                         }
 
-                        imeIgraca = dijelovi[0].Trim();
-                        listaIgara = dijelovi[1].Trim();
-
-                        igre = listaIgara.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).ToArray();
-                        string[] validneIgre = { "an", "po", "as" };
-                        bool ispravnaListaIgara = igre.All(igra => validneIgre.Contains(igra.Trim()));
-
-                        if (!ispravnaListaIgara)
-                        {
-                            byte[] odgovorIgre = Encoding.UTF8.GetBytes("Neispravna lista igara.Pokusajte ponovo!\n");
-                            serverUDP.SendTo(odgovorIgre, klijentEP);
-                            continue;
-                        }
-                        else
-                        {
-                            brojIgara = igre.Length;
-
-                            igrac = new Igrac(imeIgraca, brojIgara);
-
-                            string prijavaOdgovor = "Prijava je uspjesna.Uspostavljanje TCP konekcije...........\n";
-                            Console.WriteLine(prijavaOdgovor);
-                            byte[] prijavaBajt = Encoding.UTF8.GetBytes(prijavaOdgovor);
-                            serverUDP.SendTo(prijavaBajt, klijentEP);
-                            break;
-                        }
 
                     }
-                    else
+                    catch (SocketException ex)
                     {
-                        byte[] prijava = Encoding.UTF8.GetBytes("Neuspjesna prijava!Pokusajte ponovo!\n");
-                        serverUDP.SendTo(prijava, klijentEP);
+                        Console.WriteLine($"Doslo je do greske prilikom prijema poruke: {ex}\n");
                     }
-
-
                 }
-                catch (SocketException ex)
+
+                if (prijavljeniIgraci.Count == 2)
                 {
-                    Console.WriteLine($"Doslo je do greske prilikom prijema poruke: {ex}\n");
+                    Console.WriteLine("Oba igraca su se prijavila.Pocinje takmicenje.");
+                    break;
+                }
+
+                if (prijavljeniIgraci.Count == 1 && prvaPrijava != null && DateTime.Now - prvaPrijava > cekanjeDrugePrijave)
+                {
+                    Console.WriteLine("Prijavio se samo jedan igrac. Pocinje trening.");
+
+                    break;
                 }
             }
+            #endregion 
+
 
             try
-            {
-                //TCP konekcija
-                Socket serverTCP = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                serverTCP.Bind(new IPEndPoint(IPAddress.Any, 50019));
-                serverTCP.Listen(5);
+            {                
+                Console.WriteLine("Prijava je prihvacena. Igra uskoro pocinje.");
 
-                Socket klijentSocket = serverTCP.Accept();
-                Console.WriteLine("Uspostavljena je TCP konekcija sa igracem.");
+                bool trening = prijavljeniIgraci.Count == 1;
+                int ocekivani = trening ? 1 : 2;
+                List<SesijaIgraca> sviIgraci = new List<SesijaIgraca>();
+                ConsoleColor[] boje = { ConsoleColor.Blue, ConsoleColor.Red };
 
-                string dobrodoslica = $"Dobrodosli u trening igru kviza Kviskoteka. Danasnji takmicar je: {imeIgraca}";
-                byte[] dobrodoslicaBajti = Encoding.UTF8.GetBytes(dobrodoslica);
-                klijentSocket.Send(dobrodoslicaBajti);
-
-                Console.WriteLine("Poruka dobrodoslice poslata.Igra uskoro pocinje.\n");
-
-                byte[] start = new byte[1024];
-                int brBajta = klijentSocket.Receive(start);
-                string startStr = Encoding.UTF8.GetString(start, 0, brBajta);
-                int brOdigranihIgara = 0;
-
-                if (startStr.Equals("START", StringComparison.OrdinalIgnoreCase)) //igra pocinje ako je korisnik unio START
+                #region Prihvatanje Igraca
+                while (sviIgraci.Count < ocekivani)
                 {
-                    //Pocetak igre
-
-                    string igreNazivi = string.Join(", ", igre.Select(i => PuniNaziviIgara.ContainsKey(i) ? PuniNaziviIgara[i] : i));
-                    Console.WriteLine($"Pocinju igre: {igreNazivi} za igraca {imeIgraca}!");
-
-                    for (int i = 0; i < igre.Length; i++)
+                    if(serverTCP.Poll(1000*1000, SelectMode.SelectRead))
                     {
-                        string igra = igre[i];
-                        bool ponovi;
+                        Socket klijent = serverTCP.Accept();
 
-                        do
+                        var (ime, igre) = prijavljeniIgraci.Values.ElementAt(sviIgraci.Count);
+                        Igrac igrac = new Igrac(ime, igre.Length);
+                        var sesija = new SesijaIgraca(klijent, igrac, igre, boje[sviIgraci.Count % boje.Length]);
+                        sviIgraci.Add(sesija);
+
+                        Console.ForegroundColor = sesija.Boja;
+                        Console.WriteLine($">>Igrac {ime} je povezan.\n");
+                        Console.ResetColor();
+
+                        string dobrodoslica = sviIgraci.Count == 1 && prijavljeniIgraci.Count == 1
+                            ? $"Dobrodosli u trening igru Kviskoteka! Danasnji takmicar je {ime}."
+                            : "Dobrodosli u Kviskoteka takmicenje! Vas protivnik ce uskoro biti spreman.";
+                        klijent.Send(Encoding.UTF8.GetBytes(dobrodoslica));
+                        
+                        
+                    }
+                }
+                Console.WriteLine(">>Poruka dobrodoslice je poslata igracima.");
+
+                Thread.Sleep(50);
+
+                #endregion
+
+
+                #region START
+                Console.WriteLine("Ceka se START kako bi se igra pokrenula.");
+                foreach (var igrac in sviIgraci)
+                {
+                    igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes("Unesite START za pocetak igre: \n"));
+                }
+
+                int startPrimljen = 0;
+                while (startPrimljen < sviIgraci.Count)
+                {
+                    foreach (var igrac in sviIgraci)
+                    {
+                        if (!igrac.Startovan && igrac.KlijentSocket.Poll(1000 * 1000, SelectMode.SelectRead))
                         {
-                            byte[] kviskoBf = new byte[1024];
-                            int kviskoBr = klijentSocket.Receive(kviskoBf);
-                            string kvisko = Encoding.UTF8.GetString(kviskoBf, 0, kviskoBr);
+                            byte[] startBf = new byte[1024];
+                            int br = igrac.KlijentSocket.Receive(startBf);
+                            string poruka = Encoding.UTF8.GetString(startBf, 0, br).Trim().ToUpper();
 
-                            if (kvisko == "KVISKO")
+                            if (poruka == "START")
                             {
-                                igrac.UloziKvisko();
-                                Console.WriteLine($"Kvisko je ulozen za igru: {PuniNaziviIgara[igra]}");
+                                igrac.Startovan = true;
+                                Console.ForegroundColor = igrac.Boja;
+                                Console.WriteLine($">>Igrac {igrac.Igrac.Nadimak} je poslao START.\n");
+                                Console.ResetColor();
+                                startPrimljen++;
                             }
-                            else
-                            {
-                                Console.WriteLine($"Kvisko nije ulozen za igru: {PuniNaziviIgara[igra]}");
-                            }
-
-                            string igraTrimovana = igra.Trim().ToLower();
-                            PokreniIgru(klijentSocket, igraTrimovana, igrac, brOdigranihIgara);
-
-                            byte[] ponovoBf = new byte[1024];
-                            int ponovoBr = klijentSocket.Receive(ponovoBf);
-                            string odgovor = Encoding.UTF8.GetString(ponovoBf, 0, ponovoBr);
-
-                            if (odgovor == "AGAIN")
-                            {
-                                Console.WriteLine($"Igrac zeli da igra {igra} ponovo.");
-                                ponovi = true;
-                            }
-                            else
-                            {
-                                ponovi = false;
-                            }
-                        } while (ponovi);
-
-                        brOdigranihIgara++;
+                        }
                     }
 
-                    if (brOdigranihIgara == brojIgara) //Ako je igrac odigrao sve igre, prikazuju se svi bodovi koje je skupio
+                    Thread.Sleep(50);
+                }
+                #endregion
+
+                #region KVISKO
+                Console.WriteLine(">>KVISKO<<");
+
+                int brojIgara = sviIgraci[0].Igre.Length;
+                int brojOdigranihIgara = 0;
+                
+
+                for ( int i = 0; i < brojIgara; i++)
+                {
+                    string igra = sviIgraci[0].Igre[i];
+                    bool ponoviIgru = false;
+
+                    do
                     {
-                        string kraj = $"\nKraj trening igre! Igrac {igrac.Nadimak} je osvojio {igrac.UkupanBrojPoena()} poena.";
-                        klijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
-                        klijentSocket.Shutdown(SocketShutdown.Both);
+                        foreach (var igrac in sviIgraci)
+                        {
+                            igrac.KviskoPrimljen[i] = false;
+                        }
+                        int kviskoPrimljen = 0;
+
+                        
+                        foreach (var igrac in sviIgraci)
+                        {
+                            if (!igrac.KviskoPrimljen[i])
+                            {
+                                string kviskoPitanje = $"Da li zelite da ulozite KVISKO za igru {PuniNaziviIgara[igra]}?";
+                                igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(kviskoPitanje + "\n"));
+                            }
+                        }
+
+                        while (kviskoPrimljen < sviIgraci.Count)
+                        {
+                            foreach (var igrac in sviIgraci)
+                            {
+                                if (!igrac.KviskoPrimljen[i] && igrac.KlijentSocket.Poll(1000 * 1000, SelectMode.SelectRead))
+                                {
+                                    byte[] kviskoBf = new byte[1024];
+                                    int br = igrac.KlijentSocket.Receive(kviskoBf);
+                                    string kvisko = Encoding.UTF8.GetString(kviskoBf, 0, br).Trim().ToUpper();
+
+                                    if (kvisko == "KVISKO")
+                                    {
+                                        igrac.Igrac.UloziKvisko();
+                                        igrac.KviskoPoIgrama[i] = true;
+                                        Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} ulaze KVISKO za igru {PuniNaziviIgara[igra]}.");
+                                    }
+                                    else
+                                    {
+                                        igrac.KviskoPoIgrama[i] = false;
+                                        Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} ne ulaze KVISKO za igru {PuniNaziviIgara[igra]}.");
+                                    }
+
+                                    igrac.KviskoPrimljen[i] = true;
+                                    kviskoPrimljen++;
+                                }
+                            }
+
+                            Thread.Sleep(50);
+                        }
+
+                        Console.WriteLine("-----------------------------------------------------------\n");
+                        #endregion
+
+
+                        foreach (var igrac in sviIgraci)
+                        {
+                            Console.ForegroundColor = igrac.Boja;
+                            Console.WriteLine($">> {igrac.Igrac.Nadimak} igra igru {PuniNaziviIgara[igra]}");
+                            Console.ResetColor();
+                        }
+
+                        PokreniIgru(igra, i, sviIgraci);
+
+
+                        if (trening)
+                        {
+                            SesijaIgraca igrac = sviIgraci[0];
+                            igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes($"Da li zelite da ponovite igru {PuniNaziviIgara[igra]}? (da/ne)\n"));
+
+                            if (igrac.KlijentSocket.Poll(10 * 1000 * 1000, SelectMode.SelectRead))
+                            {
+                                byte[] ponovoBafer = new byte[1024];
+                                int br = igrac.KlijentSocket.Receive(ponovoBafer);
+                                string odgovor = Encoding.UTF8.GetString(ponovoBafer, 0, br).Trim().ToUpper();
+
+                                ponoviIgru = false;
+                                if (odgovor == "PONOVO")
+                                {
+                                    Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} zeli da ponovi igru {PuniNaziviIgara[igra]}");
+                                    ponoviIgru = true; 
+                                }
+                                else
+                                {
+                                    brojOdigranihIgara++;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine(">> Nije stigao odgovor za ponavljanje — Igra se ne ponavlja.");
+                                brojOdigranihIgara++;
+                            }
+                        }
+
+                    } while (ponoviIgru);
+
+                    
+
+                    if (brojOdigranihIgara == brojIgara * sviIgraci.Count)
+                    {
+                        
+                        break;
                     }
+
+                }
+
+
+                if (trening)
+                {
+                    string kraj = $"Kraj trening igre! Osvojili ste ukupno {sviIgraci[0].Igrac.UkupanBrojPoena()} poena. Cestitamo! \n ";
+                    sviIgraci[0].KlijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
+                    sviIgraci[0].KlijentSocket.Shutdown(SocketShutdown.Both);
+                    sviIgraci[0].KlijentSocket.Close();
                 }
                 else
                 {
-                    Console.WriteLine($"Igrac {imeIgraca} nije poslao START. Konekcija se zatvara");
-                    klijentSocket.Close();
+                    string porukaPobjednik = Pobjednik.ProglasiPobjednika(sviIgraci);
+                    string tabela = Tabela.IspisiKonacnuTabelu(sviIgraci, sviIgraci[0].Igre);
+
+                    Console.WriteLine(porukaPobjednik);
+                    Console.WriteLine($"Pregled igre: \n {tabela}");
+
+                    foreach (var igrac in sviIgraci)
+                    {
+                        igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(porukaPobjednik));
+                        Thread.Sleep(100); 
+                        igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(tabela));
+                        igrac.KlijentSocket.Shutdown(SocketShutdown.Both);
+                        igrac.KlijentSocket.Close();
+                    }
+
                 }
-
-
-
             }
             catch (SocketException ex)
             {
@@ -193,210 +368,25 @@ namespace Server
             Console.ReadKey();
         }
 
-        private static void PokreniIgru(Socket klijentSocket, string igra, Igrac igrac, int brIgre)
+        #region Pokretanje Igara
+        private static void PokreniIgru(string igra,int brIgre, List<SesijaIgraca> igraci)
         {
-            int poeni = 0;
-
             switch (igra)
             {
                 case "an":
-                    poeni = AnagramiIgra(klijentSocket);
+                    PokreniAnagrami.AnagramiIgra(igraci, brIgre);
                     break;
                 case "po":
-                    poeni = PitanjaOdgovoriIgra(klijentSocket);
+                     PokreniPIO.PitanjaOdgovoriIgra(igraci, brIgre);
                     break;
                 case "as":
-                    poeni = AsocijcijeIgra(klijentSocket);
+                    PokreniAS.AsocijcijeIgra(igraci, brIgre);
                     break;
             }
 
-            igrac.DodajPoene(brIgre, poeni);
         }
 
-        private static int AnagramiIgra(Socket klijentSocket)
-        {
-            Console.WriteLine("----------IGRA ANAGRAMI ----------\n");
+        #endregion 
 
-            List<string> listaRijeci = new List<string> { "programiranje", "racunar", "fakultet", "univerzitet", "tastatura", "elektrotehnika" };
-            Random random = new Random();
-            string unesenaRijec = listaRijeci[random.Next(listaRijeci.Count)].ToLower();
-
-            Console.WriteLine($"Izgenerisana rijec za anagram je: {unesenaRijec}");
-            Anagrami anagrami = new Anagrami();
-            anagrami.UcitajRijeci(unesenaRijec);
-
-            string poruka = $"Vasa rijec za anagram je: \"{anagrami.PocetnaRijec}\".Posaljite validan anagram koristeci ista slova.";
-            klijentSocket.Send(Encoding.UTF8.GetBytes(poruka));
-
-            byte[] prijemniBafer = new byte[1024];
-            int brBajta = klijentSocket.Receive(prijemniBafer);
-            string predlozenAnagram = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-            Console.WriteLine($"Uneseni anagram: {predlozenAnagram}.");
-            Console.WriteLine("Provjera u toku.");
-
-            anagrami.PostaviPredlozenAnagram(predlozenAnagram);
-
-            bool ispravanAnagram = anagrami.ProvjeriAnagram();
-
-            string rezultat = ispravanAnagram ? "Anagram je validan!" : "Anagram nije validan!";
-            klijentSocket.Send(Encoding.UTF8.GetBytes(rezultat));
-            Console.WriteLine(rezultat);
-
-            int poeni = ispravanAnagram ? anagrami.IzracunajPoene() : 0;
-            klijentSocket.Send(Encoding.UTF8.GetBytes(poeni.ToString()));
-
-            Console.WriteLine($"Igra anagrami je zavrsena. Igrac je osvojio {poeni} poena.");
-            Console.WriteLine("-----------------------------------------------------------\n");
-
-            return poeni;
-        }
-
-        private static int PitanjaOdgovoriIgra(Socket klijentSocket)
-        {
-            Console.WriteLine("----------IGRA PITANJA I ODGOVORI----------");
-            PitanjaOdgovori pitanjaOdgovori = new PitanjaOdgovori();
-
-            while (true)
-            {
-                string pitanje = pitanjaOdgovori.PostaviSljedecePitanje();
-                if (pitanje == "Igra je zavrsena! Nema vise pitanja.")
-                {
-                    klijentSocket.Send(Encoding.UTF8.GetBytes("KRAJ"));
-                    break;
-                }
-
-                byte[] pitanjeBajti = Encoding.UTF8.GetBytes($"Pitanje: {pitanje} \n Odgovorite sa'A' za tacno ili 'B' za netacno");
-                klijentSocket.Send(pitanjeBajti);
-
-                byte[] prijemniBafer = new byte[1024];
-                int brBajta = klijentSocket.Receive(prijemniBafer);
-                string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-
-                string rezultat = pitanjaOdgovori.ProvjeriOdgovor(odgovor[0]);
-                Console.WriteLine(rezultat);
-                klijentSocket.Send(Encoding.UTF8.GetBytes(rezultat));
-            }
-
-            int ukupniPoeni = pitanjaOdgovori.UkupnoPoena();
-            klijentSocket.Send(Encoding.UTF8.GetBytes($"Osvojili ste ukupno {ukupniPoeni} poena"));
-
-            Console.WriteLine($"Igra pitanja i odgovori je zavrsena. Igrac je osvojio {ukupniPoeni} poena.");
-            Console.WriteLine("-----------------------------------------------------------\n");
-
-            return ukupniPoeni;
-        }
-
-        private static int AsocijcijeIgra(Socket klijentSocket)
-        {
-            Console.WriteLine("----------IGRA ASOCIJACIJE----------\n");
-
-            Asocijacije igra = new Asocijacije();
-            igra.UcitajAsocijaciju("asocijacije.txt");
-
-            bool[] kolonaRijesena = new bool[4];
-            bool konacnoRijeseno = false;
-            int brGresaka = 0;
-            int poeni = 0;
-            int maxGresaka = 5;
-
-            while (true)
-            {
-                if (konacnoRijeseno || brGresaka >= maxGresaka)
-                {
-                    string kraj = $"Igra je zavrsena! Ukupno ste osvojili {poeni} poena!\n";
-                    klijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
-                    break;
-                }
-
-                klijentSocket.Send(Encoding.UTF8.GetBytes(igra.PrikaziStanje()));
-
-                byte[] prijemniBafer = new byte[2048];
-                int brBajta = klijentSocket.Receive(prijemniBafer);
-                string potez = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-
-                string odgovor = "";
-
-                if (potez.Length == 2 && char.IsLetter(potez[0]) && char.IsDigit(potez[1]))
-                {
-                    odgovor = igra.OtvoriPolje(potez.ToUpper());
-                    odgovor = $"Otvoreno polje {potez.ToUpper()}: {odgovor}\n";
-                    Console.WriteLine(odgovor);
-                }
-                else if (potez.Length > 2 && potez[1] == ':')
-                {
-                    if (potez.StartsWith("K:"))
-                    {
-                        string konacni = potez.Substring(2).Trim();
-                        if (igra.ProvjeriKonacnoRjesenje(konacni))
-                        {
-                            konacnoRijeseno = true;
-                            for (int i = 0; i < 4; i++)
-                            {
-                                if (!kolonaRijesena[i])
-                                {
-                                    kolonaRijesena[i] = true;
-                                    poeni += igra.IzracunajPoeneKolona(i);
-                                }
-                            }
-
-                            poeni += igra.PoeniKonacno;
-                            igra.OtvoriSve();
-                            odgovor = $" {igra.PrikaziStanje()} \nTacno! Osvojili ste {igra.PoeniKonacno} poena za konacno rjesenje!\n";
-                            Console.WriteLine("Igrac je pogodio konacno rjesenje.");
-
-                        }
-                        else
-                        {
-                            brGresaka++;
-                            odgovor = "Netacno konacno rjesenje!\n";
-                            Console.WriteLine(odgovor);
-                        }
-                    }
-                    else
-                    {
-                        char kolona = potez[0];
-                        string kolonaOdg = potez.Substring(2).Trim();
-                        int kolonaIdx = kolona - 'A';
-
-                        if (!kolonaRijesena[kolonaIdx])
-                        {
-                            if (igra.ProvjeriRjesenjeKolone(kolona, kolonaOdg))
-                            {
-                                int poeniKolona = igra.IzracunajPoeneKolona(kolonaIdx);
-                                poeni += poeniKolona;
-                                kolonaRijesena[kolonaIdx] = true;
-                                igra.OtvoriSvaPoljaKolone(kolonaIdx);
-                                odgovor = $"Tacno rjesenje kolone {kolona}! Osvojili ste {poeniKolona} poena.\n";
-                                Console.WriteLine($"Igrac: {potez}");
-                                Console.WriteLine("Tacno rjesenje kolone.");
-                            }
-                            else
-                            {
-                                brGresaka++;
-                                odgovor = "Netacno rjesenje kolone.\n";
-                                Console.WriteLine(odgovor);
-                            }
-                        }
-                        else
-                        {
-                            odgovor = "Kolona je vec rijesena!\n";
-                            Console.WriteLine(odgovor);
-                        }
-                    }
-                }
-                else
-                {
-                    odgovor = "Neispravan unos.\n";
-                }
-
-                klijentSocket.Send(Encoding.UTF8.GetBytes(odgovor));
-            }
-
-
-            Console.WriteLine($"Igra asocijacije je zavrsena. Igrac je osvojio {poeni} poena.");
-            Console.WriteLine("-----------------------------------------------------------\n");
-
-            return poeni;
-        }
     }
 }

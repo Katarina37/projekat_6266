@@ -47,10 +47,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IgreStart\PokreniAnagrami.cs" />
+    <Compile Include="IgreStart\PokreniPIO.cs" />
     <Compile Include="Klase\Anagrami.cs" />
     <Compile Include="Klase\Asocijacije.cs" />
     <Compile Include="Klase\Igrac.cs" />
     <Compile Include="Klase\PitanjaOdgovori.cs" />
+    <Compile Include="Klase\SesijaIgraca.cs" />
+    <Compile Include="IgreStart\PokreniAS.cs" />
+    <Compile Include="PomocneMetode\Pobjednik.cs" />
+    <Compile Include="PomocneMetode\Tabela.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
