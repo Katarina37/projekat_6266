@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace Klijent.Igre
 {
@@ -12,7 +10,10 @@ namespace Klijent.Igre
     {
         public static void PitanjaOdgovoriIgra(Socket klijentSocket)
         {
-            Console.WriteLine("----------IGRA PITANJA I ODGOVORI ----------\n");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("-------------IGRA PITANJA I ODGOVORI -------------\n");
+            Console.ResetColor();
+
             byte[] prijemniBafer = new byte[2048];
 
             while (true)
@@ -77,7 +78,9 @@ namespace Klijent.Igre
                 Thread.Sleep(100);
             }
 
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("-----------------------------------------------------------\n");
+            Console.ResetColor();
         }
     }
 }

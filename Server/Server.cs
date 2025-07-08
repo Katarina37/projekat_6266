@@ -182,7 +182,7 @@ namespace Server
 
 
                 #region START
-                Console.WriteLine("Ceka se START kako bi se igra pokrenula.");
+                Console.WriteLine("Ceka se START kako bi se igra pokrenula.\n");
                 foreach (var igrac in sviIgraci)
                 {
                     igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes("Unesite START za pocetak igre: \n"));
@@ -214,8 +214,8 @@ namespace Server
                 }
                 #endregion
 
-                #region KVISKO
-                Console.WriteLine(">>KVISKO<<");
+                
+                
 
                 int brojIgara = sviIgraci[0].Igre.Length;
                 int brojOdigranihIgara = 0;
@@ -223,9 +223,9 @@ namespace Server
 
                 for ( int i = 0; i < brojIgara; i++)
                 {
+                    Console.WriteLine(">>KVISKO<<");
                     string igra = sviIgraci[0].Igre[i];
                     bool ponoviIgru = false;
-                    
 
                     do
                     {
@@ -242,7 +242,6 @@ namespace Server
                             {
                                 string kviskoPitanje = $"Da li zelite da ulozite KVISKO za igru {PuniNaziviIgara[igra]}?";
                                 igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(kviskoPitanje + "\n"));
-                                Console.WriteLine("Poslao KVISKO pitanje.\n");
                             }
                         }
 
@@ -259,13 +258,13 @@ namespace Server
                                     if (kvisko == "KVISKO")
                                     {
                                         igrac.Igrac.UloziKvisko();
-                                        Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} ulaze KVISKO za igru {PuniNaziviIgara[igra]}.");
+                                        Console.WriteLine($">>{igrac.Igrac.Nadimak} ulaze KVISKO za igru {PuniNaziviIgara[igra]}.\n");
                                         igrac.KviskoPoIgrama[i] = true;
                                         
                                     }
                                     else
                                     {
-                                        Console.WriteLine($"Igrac {igrac.Igrac.Nadimak} ne ulaze KVISKO za igru {PuniNaziviIgara[igra]}.");
+                                        Console.WriteLine($">>{igrac.Igrac.Nadimak} ne ulaze KVISKO za igru {PuniNaziviIgara[igra]}.\n");
                                         igrac.KviskoPoIgrama[i] = false;
                                         
                                     }
@@ -279,13 +278,13 @@ namespace Server
                         }
 
                         Console.WriteLine("-----------------------------------------------------------\n");
-                        #endregion
+                        
 
 
                         foreach (var igrac in sviIgraci)
                         {
                             Console.ForegroundColor = igrac.Boja;
-                            Console.WriteLine($">> {igrac.Igrac.Nadimak} igra igru {PuniNaziviIgara[igra]}");
+                            Console.WriteLine($">> {igrac.Igrac.Nadimak} igra igru {PuniNaziviIgara[igra]}\n\n");
                             Console.ResetColor();
                         }
 

@@ -16,109 +16,174 @@ namespace Server
             Asocijacije igra = new Asocijacije();
             igra.UcitajAsocijaciju("asocijacije.txt");
 
-            // bool[] kolonaRijesena = new bool[4];
-            //bool konacnoRijeseno = false;
-            //int brGresaka = 0;
-            //int poeni = 0;
-            //int maxGresaka = 5;
-            /*
-            while (true)
+            bool[] kolonaRijesena = new bool[4];
+            bool konacnoRijeseno = false;
+            int maxGresaka = 5;
+            Dictionary<SesijaIgraca, int> greske = igraci.ToDictionary(i => i, i => 0);
+            Dictionary<SesijaIgraca, int> poeniIgraca = igraci.ToDictionary(i => i, i => 0);
+
+            int igracNaPotezu = 0;
+
+            while (!konacnoRijeseno && greske.All(g => g.Value < maxGresaka))
             {
-                if (konacnoRijeseno || brGresaka >= maxGresaka)
+                for (int i = 0; i < igraci.Count; i++)
                 {
-                    string kraj = $"Igra je zavrsena! Ukupno ste osvojili {poeni} poena!\n";
-                    klijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
-                    break;
-                }
+                    var igrac = igraci[i];
+                    string stanje = igra.PrikaziStanje();
+                    string drugo = "Protivnik je na potezu.\n";
 
-                klijentSocket.Send(Encoding.UTF8.GetBytes(igra.PrikaziStanje()));
-
-                byte[] prijemniBafer = new byte[2048];
-                int brBajta = klijentSocket.Receive(prijemniBafer);
-                string potez = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-
-                string odgovor = "";
-
-                if (potez.Length == 2 && char.IsLetter(potez[0]) && char.IsDigit(potez[1]))
-                {
-                    odgovor = igra.OtvoriPolje(potez.ToUpper());
-                    odgovor = $"Otvoreno polje {potez.ToUpper()}: {odgovor}\n";
-                    Console.WriteLine(odgovor);
-                }
-                else if (potez.Length > 2 && potez[1] == ':')
-                {
-                    if (potez.StartsWith("K:"))
+                    if (i == igracNaPotezu)
                     {
-                        string konacni = potez.Substring(2).Trim();
-                        if (igra.ProvjeriKonacnoRjesenje(konacni))
+                        stanje += "\n [TI SI NA POTEZU]: ";
+                        igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(stanje));
+                    } else
+                    {
+                        igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(drugo));
+                    }
+
+                }
+
+                var trenutniIgrac = igraci[igracNaPotezu];
+
+
+                if (trenutniIgrac.KlijentSocket.Poll(30 * 1000 * 1000, System.Net.Sockets.SelectMode.SelectRead))
+                {
+                    byte[] prijemniBafer = new byte[2048];
+                    int brBajta = trenutniIgrac.KlijentSocket.Receive(prijemniBafer);
+                    string potez = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta).Trim();
+
+                    string odgovor;
+
+                    if (potez.Length == 2 && char.IsLetter(potez[0]) && char.IsDigit(potez[1]))
+                    {
+                        string rez = igra.OtvoriPolje(potez.ToUpper());
+                        odgovor = $"Otvoreno polje {potez.ToUpper()}: {rez}\n";
+                        Console.ForegroundColor = trenutniIgrac.Boja;
+                        Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak} je otvorio polje {potez.ToUpper()} => {rez} \n");
+                        Console.ResetColor();
+                    }
+                    else if (potez.Length > 2 && potez[1] == ':')
+                    {
+                        if (potez.StartsWith("K:"))
                         {
-                            konacnoRijeseno = true;
-                            for (int i = 0; i < 4; i++)
+                            string konacni = potez.Substring(2).Trim();
+                            if (igra.ProvjeriKonacnoRjesenje(konacni))
                             {
-                                if (!kolonaRijesena[i])
+                                konacnoRijeseno = true;
+                                for (int i = 0; i < 4; i++)
                                 {
-                                    kolonaRijesena[i] = true;
-                                    poeni += igra.IzracunajPoeneKolona(i);
+                                    if (!kolonaRijesena[i])
+                                    {
+                                        kolonaRijesena[i] = true;
+                                        poeniIgraca[trenutniIgrac] += igra.IzracunajPoeneKolona(i);
+                                    }
                                 }
+
+                                poeniIgraca[trenutniIgrac] += igra.PoeniKonacno;
+                                igra.OtvoriSve();
+                                odgovor = $" {igra.PrikaziStanje()} \nTacno! Osvojili ste {igra.PoeniKonacno} poena za konacno rjesenje!\n";
+                                Console.ForegroundColor = trenutniIgrac.Boja;
+                                Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak} : {potez}");
+                                Console.WriteLine("Igrac je pogodio konacno rjesenje.");
+                                Console.ResetColor();
+
                             }
-
-                            poeni += igra.PoeniKonacno;
-                            igra.OtvoriSve();
-                            odgovor = $" {igra.PrikaziStanje()} \nTacno! Osvojili ste {igra.PoeniKonacno} poena za konacno rjesenje!\n";
-                            Console.WriteLine("Igrac je pogodio konacno rjesenje.");
-
+                            else
+                            {
+                                greske[trenutniIgrac]++;
+                                odgovor = "Netacno konacno rjesenje!\n";
+                                Console.ForegroundColor = ConsoleColor.DarkRed;
+                                Console.WriteLine(odgovor);
+                                Console.ResetColor();
+                            }
                         }
                         else
                         {
-                            brGresaka++;
-                            odgovor = "Netacno konacno rjesenje!\n";
-                            Console.WriteLine(odgovor);
+                            char kolona = potez[0];
+                            string kolonaOdg = potez.Substring(2).Trim();
+                            int kolonaIdx = kolona - 'A';
+
+                            if (!kolonaRijesena[kolonaIdx])
+                            {
+                                if (igra.ProvjeriRjesenjeKolone(kolona, kolonaOdg))
+                                {
+                                    int poeniKolona = igra.IzracunajPoeneKolona(kolonaIdx);
+                                    poeniIgraca[trenutniIgrac] += poeniKolona;
+                                    kolonaRijesena[kolonaIdx] = true;
+                                    igra.OtvoriSvaPoljaKolone(kolonaIdx);
+                                    odgovor = $"Tacno rjesenje kolone {kolona}! Osvojili ste {poeniKolona} poena.\n";
+                                    Console.ForegroundColor = trenutniIgrac.Boja;
+                                    Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak}: {potez}");
+                                    Console.ResetColor();
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine($"Tacno rjesenje kolone {kolona}.");
+                                    Console.ResetColor();
+                                }
+                                else
+                                {
+                                    greske[trenutniIgrac]++;
+                                    odgovor = $"Netacno rjesenje kolone {kolona}.\n";
+                                    Console.ForegroundColor = trenutniIgrac.Boja;
+                                    Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak}: {potez}");
+                                    Console.ResetColor();
+                                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                                    Console.WriteLine(odgovor);
+                                    Console.ResetColor();
+
+                                }
+                            }
+                            else
+                            {
+                                odgovor = "Kolona je vec rijesena!\n";
+                                Console.ForegroundColor = trenutniIgrac.Boja;
+                                Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak}: {potez}");
+                                Console.ResetColor();
+                                Console.ForegroundColor = ConsoleColor.DarkRed;
+                                Console.WriteLine(odgovor);
+                                Console.ResetColor();
+                            }
                         }
                     }
                     else
                     {
-                        char kolona = potez[0];
-                        string kolonaOdg = potez.Substring(2).Trim();
-                        int kolonaIdx = kolona - 'A';
-
-                        if (!kolonaRijesena[kolonaIdx])
-                        {
-                            if (igra.ProvjeriRjesenjeKolone(kolona, kolonaOdg))
-                            {
-                                int poeniKolona = igra.IzracunajPoeneKolona(kolonaIdx);
-                                poeni += poeniKolona;
-                                kolonaRijesena[kolonaIdx] = true;
-                                igra.OtvoriSvaPoljaKolone(kolonaIdx);
-                                odgovor = $"Tacno rjesenje kolone {kolona}! Osvojili ste {poeniKolona} poena.\n";
-                                Console.WriteLine($"Igrac: {potez}");
-                                Console.WriteLine("Tacno rjesenje kolone.");
-                            }
-                            else
-                            {
-                                brGresaka++;
-                                odgovor = "Netacno rjesenje kolone.\n";
-                                Console.WriteLine(odgovor);
-                            }
-                        }
-                        else
-                        {
-                            odgovor = "Kolona je vec rijesena!\n";
-                            Console.WriteLine(odgovor);
-                        }
+                        odgovor = "Neispravan unos.\n";
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine(odgovor);
+                        Console.ResetColor();
                     }
-                }
-                else
+
+                    byte[] poruka = Encoding.UTF8.GetBytes(odgovor);
+                    trenutniIgrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(odgovor));
+
+                    if (greske[trenutniIgrac] >= maxGresaka)
+                    {
+                        trenutniIgrac.KlijentSocket.Send(Encoding.UTF8.GetBytes("Dostigli ste maksimalan broj gresaka.\n"));
+                    }
+
+                    igracNaPotezu = (igracNaPotezu + 1) % igraci.Count;
+
+                } else
                 {
-                    odgovor = "Neispravan unos.\n";
+                    trenutniIgrac.KlijentSocket.Send(Encoding.UTF8.GetBytes("Isteklo Vam je vrijeme. Protivnik je na potezu.\n"));
+                    igracNaPotezu = (igracNaPotezu + 1) % igraci.Count;
                 }
 
-                klijentSocket.Send(Encoding.UTF8.GetBytes(odgovor));
+
             }
 
+            Console.WriteLine("Igra asocijacije je zavrsena!");
 
-            Console.WriteLine($"Igra asocijacije je zavrsena. Igrac je osvojio {poeni} poena.");*/
-            Console.WriteLine("-----------------------------------------------------------\n");
+            for(int i = 0; i < igraci.Count; i++)
+            {
+                igraci[i].Igrac.DodajPoene(brojIgre, poeniIgraca[igraci[i]]);
+                string kraj = $"Igra Asocijacije je zavrsena! Ukupno ste osvojili {poeniIgraca[igraci[i]]} poena.\n";
+                igraci[i].KlijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
 
+                Console.ForegroundColor = igraci[i].Boja;
+                Console.WriteLine($"Igrac {igraci[i].Igrac.Nadimak} osvojio je {poeniIgraca[igraci[i]]} poena.");
+                Console.ResetColor();
+                igraci[i].ZavrsioIgru = true;
+            }
 
         }
     }

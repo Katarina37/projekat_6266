@@ -127,14 +127,12 @@ namespace Klijent
 
                 }
 
-                bool kviskoIskoristen = false;
-
                 
-
                 for (int i = 0; i < igre.Length; i++)
                 {
                    string igra = igre[i];
                    bool ponoviIgru = false;
+                   bool kviskoIskoristen = false;
 
                     do
                     {
@@ -199,7 +197,7 @@ namespace Klijent
                                 PokreniPiO.PitanjaOdgovoriIgra(klijentTCP);
                                 break;
                             case "as":
-                                AsocijacijeIgra(klijentTCP);
+                                PokreniAs.AsocijacijeIgra(klijentTCP);
                                 break;
 
                         }
@@ -292,44 +290,6 @@ namespace Klijent
 
             Console.WriteLine("Klijent zavrsava sa radom.");
             Console.ReadKey();
-        }
-
-        
-        
-
-
-        private static void AsocijacijeIgra(Socket klijentSocket)
-        {
-            while (true)
-            {
-                byte[] prijemniBafer = new byte[2048];
-                int brBajta = klijentSocket.Receive(prijemniBafer);
-
-                string stanje = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-                Console.WriteLine(stanje);
-
-                if (stanje.Contains("Igra je zavrsena! "))
-                {
-                    break;
-                }
-                else
-                {
-                    Console.WriteLine("\nUnesite polje koje zelite da otvorite (npr A1) ili rjesenje(npr. A:odgovor ili K:odgovor): ");
-                    string unos = Console.ReadLine();
-
-                    klijentSocket.Send(Encoding.UTF8.GetBytes(unos.ToUpper()));
-
-                    brBajta = klijentSocket.Receive(prijemniBafer);
-                    string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-                    Console.WriteLine(odgovor);
-
-                    if (odgovor.StartsWith("Igra je zavrsena! "))
-                    {
-                        break;
-                    }
-                }
-
-            }
         }
     }
 }

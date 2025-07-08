@@ -135,20 +135,31 @@ namespace Server.Klase
 
         public string PrikaziStanje()
         {
-            string rezultat = "";
+            StringBuilder sb = new StringBuilder();
 
-            for (int i = 0; i < 4; i++)
+            for(int red = 0; red < 4; red++)
             {
-                rezultat += $"{(char)('A' + i)} 1: {(OtvorenaPolja[i][0] ? Polja[i][0] : "???")}\n";
-                rezultat += $"{(char)('A' + i)} 2: {(OtvorenaPolja[i][1] ? Polja[i][1] : "???")}\n";
-                rezultat += $"{(char)('A' + i)} 3: {(OtvorenaPolja[i][2] ? Polja[i][2] : "???")}\n";
-                rezultat += $"{(char)('A' + i)} 4: {(OtvorenaPolja[i][3] ? Polja[i][3] : "???")}\n";
-                rezultat += $"{(char)('A' + i)}:   {(KoloneRijesene[i] ? RjesenjaKolona[i] : "???")}\n";
-                rezultat += "-------------------------\n";
+                for(int kol = 0; kol < 4; kol++)
+                {
+                    string oznaka = $"{(char)('A' + kol)}{red + 1}";
+                    string sadrzaj = OtvorenaPolja[kol][red] ? Polja[kol][red] : "???";
+                    sb.Append($"{oznaka}: {sadrzaj}".PadRight(15));
+                }
+
+                sb.AppendLine();
             }
 
-            rezultat += $"KONACNO: {(KonacnoRijeseno ? KonacnoRjesenje : "???")}\n";
-            return rezultat;
+            for (int kol = 0; kol < 4; kol++)
+            {
+                string rjesenje = KoloneRijesene[kol] ? RjesenjaKolona[kol] : "???";
+                sb.Append($"{(char)('A' + kol)}:{rjesenje}".PadRight(15));
+            }
+            sb.AppendLine();
+            sb.AppendLine(new string('-', 60));
+
+            sb.AppendLine($"KONACNO: {(KonacnoRijeseno ? KonacnoRjesenje : "???")}");
+
+            return sb.ToString();
 
         }
 
