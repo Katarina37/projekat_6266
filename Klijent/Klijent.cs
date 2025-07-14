@@ -147,7 +147,6 @@ namespace Klijent
                                 string porukaKvisko = Encoding.UTF8.GetString(baferKvisko, 0, br).Trim();
 
 
-
                                 if (porukaKvisko.StartsWith("Da li zelite da ulozite KVISKO"))
                                 {
                                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -181,6 +180,7 @@ namespace Klijent
                                 }
                                 else
                                 {
+                                    Console.WriteLine(porukaKvisko);
                                     break;
                                 }
                             }
@@ -256,8 +256,6 @@ namespace Klijent
                         }
                     } while (ponoviIgru);
 
-
-
                 }
 
                 if (klijentTCP.Poll(1000 * 1000, SelectMode.SelectRead))
@@ -265,7 +263,9 @@ namespace Klijent
                     byte[] krajBafer = new byte[1024];
                     int krajBr = klijentTCP.Receive(krajBafer);
                     string kraj = Encoding.UTF8.GetString(krajBafer, 0, krajBr);
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
                     Console.WriteLine(kraj);
+                    Console.ResetColor();
                 }
 
                 if(brojIgraca > 1)
@@ -273,7 +273,7 @@ namespace Klijent
                     byte[] tabelaBafer = new byte[1024];
                     int tabelaBr = klijentTCP.Receive(tabelaBafer);
                     string tabela = Encoding.UTF8.GetString(tabelaBafer, 0, tabelaBr);
-                    Console.WriteLine($"Pregled igre: \n {tabela}");
+                    Console.WriteLine($"\nPregled igre: \n {tabela}");
                 }
 
 

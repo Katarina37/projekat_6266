@@ -21,11 +21,11 @@ namespace Server.Pomocne_metode
             sb.Append(" Igrac      |");
             foreach (string igra in igre)
             {
-                sb.Append($" {PuniNaziviIgara[igra],-10} |");
+                sb.Append($" {PuniNaziviIgara[igra],-9} |");
             }
 
             sb.Append(" Ukupno\n");
-            sb.AppendLine(new string('-', 13 + igre.Length * 14 + 8));
+            sb.AppendLine(new string('-', 15 + igre.Length * 14 + 12));
 
             foreach (var igrac in sviIgraci)
             {
@@ -34,13 +34,13 @@ namespace Server.Pomocne_metode
 
                 foreach (var poeni in igracTren.PoeniPoIgrama)
                 {
-                    sb.Append($" {poeni,10} |");
+                    sb.Append($" {poeni,13} |");
                 }
 
-                sb.AppendLine($" {igracTren.UkupanBrojPoena(),6}");
+                sb.AppendLine($" {igracTren.UkupanBrojPoena(),9}");
             }
 
-            sb.AppendLine("----------------------------------------------");
+            sb.AppendLine("--------------------------------------------------------------");
             return sb.ToString();
         }
     }

@@ -12,6 +12,7 @@ namespace Klijent.Igre
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("-------------IGRA ASOCIJACIJE -------------\n");
             Console.ResetColor();
+            string stanje = string.Empty;
 
             while (true)
             {
@@ -20,13 +21,13 @@ namespace Klijent.Igre
                     byte[] prijemniBafer = new byte[4096];
                     int brBajta = klijentSocket.Receive(prijemniBafer);
 
-                    string stanje = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
-                    Console.WriteLine(stanje);
+                    stanje = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
 
-                    if (stanje.Contains("Igra Asocijacije je zavrsena! "))
+                    if (stanje.Contains("[KRAJ]"))
                     {
                         break;
                     }
+                    Console.WriteLine(stanje);
 
                     if (stanje.Contains("[TI SI NA POTEZU]:"))
                     {
@@ -39,7 +40,7 @@ namespace Klijent.Igre
                         string odgovor = Encoding.UTF8.GetString(prijemniBafer, 0, brBajta);
                         Console.WriteLine(odgovor);
 
-                        if (odgovor.StartsWith("Igra Asocijacije je zavrsena! "))
+                        if (odgovor.StartsWith("[KRAJ]"))
                         {
                             break;
                         }
@@ -47,6 +48,10 @@ namespace Klijent.Igre
                 }
 
             }
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(stanje);
+            Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("-----------------------------------------------------------\n");

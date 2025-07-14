@@ -214,8 +214,6 @@ namespace Server
                 }
                 #endregion
 
-                
-                
 
                 int brojIgara = sviIgraci[0].Igre.Length;
                 int brojOdigranihIgara = 0;
@@ -231,9 +229,9 @@ namespace Server
                     {
                         foreach (var igrac in sviIgraci)
                         {
-                            igrac.KviskoPrimljen[i] = false;
+                            igrac.KviskoPrimljen[i] = igrac.Igrac.KviskoIskoristen;
                         }
-                        int kviskoPrimljen = 0;
+                        int kviskoPrimljen = sviIgraci.Count(igrac => igrac.KviskoPrimljen[i]);
 
                         
                         foreach (var igrac in sviIgraci)
@@ -242,6 +240,8 @@ namespace Server
                             {
                                 string kviskoPitanje = $"Da li zelite da ulozite KVISKO za igru {PuniNaziviIgara[igra]}?";
                                 igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes(kviskoPitanje + "\n"));
+                            } else {
+                                igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes("KVISKO je vec iskoristen.\n"));
                             }
                         }
 
@@ -289,19 +289,6 @@ namespace Server
                         }
 
                         PokreniIgru(igra, i, sviIgraci);
-
-                        while (true)
-                        {
-                            bool sviGotovi = sviIgraci.All(igrac => igrac.ZavrsioIgru);
-                            if (sviGotovi)
-                            {
-                                Console.WriteLine(">> Svi igraci su zavrsili trenutnu igru.");
-                                break;
-                            }
-                                
-
-                            Thread.Sleep(300); 
-                        }
 
                         
                         foreach (var igrac in sviIgraci)
@@ -355,7 +342,7 @@ namespace Server
 
                     if (brojOdigranihIgara == brojIgara * sviIgraci.Count)
                     {
-                        Console.WriteLine(">> SVE IGRE SU ZAVRSENE <<");
+                        Console.WriteLine(">> SVE IGRE SU ZAVRSENE <<\n Slijede rezultati");
                         break;
                     }
 
@@ -363,9 +350,10 @@ namespace Server
 
                 }
 
-
+                
                 if (trening)
                 {
+                    Console.WriteLine($"Kraj trening igre! Igrac {sviIgraci[0].Igrac.Nadimak} je osvojio {sviIgraci[0].Igrac.UkupanBrojPoena()} poena.\n");
                     string kraj = $"Kraj trening igre! Osvojili ste ukupno {sviIgraci[0].Igrac.UkupanBrojPoena()} poena. Cestitamo! \n ";
                     sviIgraci[0].KlijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
                     sviIgraci[0].KlijentSocket.Shutdown(SocketShutdown.Both);

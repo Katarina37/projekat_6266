@@ -8,6 +8,7 @@
         public string Nadimak { get; set; }
         public int[] PoeniPoIgrama { get; set; }
         public bool Kvisko { get; set; }
+        public bool KviskoIskoristen { get; set; }
 
         public Igrac()
         {
@@ -19,11 +20,13 @@
             Nadimak = ime;
             PoeniPoIgrama = new int[brojIgara];
             Kvisko = false;
+            KviskoIskoristen = false;
         }
 
         public void UloziKvisko()
         {
             Kvisko = true;
+            KviskoIskoristen = true;
         }
 
         public void DodajPoene(int index, int poeni)

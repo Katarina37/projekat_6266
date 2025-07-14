@@ -62,7 +62,7 @@ namespace Server.IgreStart
             {
                 int poeni = pitanjaOdgovori.UkupnoPoena(igrac.Igrac);
                 igrac.Igrac.DodajPoene(brojIgre, poeni);
-                igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes($"[KRAJ] : Osvojili ste ukupno {poeni} poena.\n"));
+                igrac.KlijentSocket.Send(Encoding.UTF8.GetBytes($"[KRAJ] : Osvojeni poeni: {poeni}.\n"));
 
                 Console.ForegroundColor = igrac.Boja;
                 Console.WriteLine($"Igra Pitanja i Odgovori je zavrsena. Igrac {igrac.Igrac.Nadimak} je osvojio {poeni} poena.\n");

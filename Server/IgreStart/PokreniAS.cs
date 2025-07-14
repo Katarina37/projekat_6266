@@ -84,14 +84,16 @@ namespace Server
                                 odgovor = $" {igra.PrikaziStanje()} \nTacno! Osvojili ste {igra.PoeniKonacno} poena za konacno rjesenje!\n";
                                 Console.ForegroundColor = trenutniIgrac.Boja;
                                 Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak} : {potez}");
-                                Console.WriteLine("Igrac je pogodio konacno rjesenje.");
+                                Console.ResetColor();
+                                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                                Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak} je pogodio konacno rjesenje.");
                                 Console.ResetColor();
 
                             }
                             else
                             {
                                 greske[trenutniIgrac]++;
-                                odgovor = "Netacno konacno rjesenje!\n";
+                                odgovor = $"Netacno konacno rjesenje! Broj gresaka je {greske[trenutniIgrac]}\n";
                                 Console.ForegroundColor = ConsoleColor.DarkRed;
                                 Console.WriteLine(odgovor);
                                 Console.ResetColor();
@@ -122,7 +124,7 @@ namespace Server
                                 else
                                 {
                                     greske[trenutniIgrac]++;
-                                    odgovor = $"Netacno rjesenje kolone {kolona}.\n";
+                                    odgovor = $"Netacno rjesenje kolone {kolona}. Broj gresaka je {greske[trenutniIgrac]}\n";
                                     Console.ForegroundColor = trenutniIgrac.Boja;
                                     Console.WriteLine($"Igrac {trenutniIgrac.Igrac.Nadimak}: {potez}");
                                     Console.ResetColor();
@@ -176,7 +178,7 @@ namespace Server
             for(int i = 0; i < igraci.Count; i++)
             {
                 igraci[i].Igrac.DodajPoene(brojIgre, poeniIgraca[igraci[i]]);
-                string kraj = $"Igra Asocijacije je zavrsena! Ukupno ste osvojili {poeniIgraca[igraci[i]]} poena.\n";
+                string kraj = $"[KRAJ] Osvojeni poeni: {poeniIgraca[igraci[i]]}\n";
                 igraci[i].KlijentSocket.Send(Encoding.UTF8.GetBytes(kraj));
 
                 Console.ForegroundColor = igraci[i].Boja;

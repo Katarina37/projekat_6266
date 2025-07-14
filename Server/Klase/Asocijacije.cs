@@ -143,7 +143,7 @@ namespace Server.Klase
                 {
                     string oznaka = $"{(char)('A' + kol)}{red + 1}";
                     string sadrzaj = OtvorenaPolja[kol][red] ? Polja[kol][red] : "???";
-                    sb.Append($"{oznaka}: {sadrzaj}".PadRight(15));
+                    sb.Append($"{oznaka}: {sadrzaj}".PadRight(20));
                 }
 
                 sb.AppendLine();
@@ -152,7 +152,7 @@ namespace Server.Klase
             for (int kol = 0; kol < 4; kol++)
             {
                 string rjesenje = KoloneRijesene[kol] ? RjesenjaKolona[kol] : "???";
-                sb.Append($"{(char)('A' + kol)}:{rjesenje}".PadRight(15));
+                sb.Append($"{(char)('A' + kol)}:{rjesenje}".PadRight(20));
             }
             sb.AppendLine();
             sb.AppendLine(new string('-', 60));
